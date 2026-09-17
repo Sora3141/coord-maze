@@ -1,9 +1,9 @@
-import { makeCoordPuzzle } from './puzzle.js?v=7f0c24d0';
-import { randomSeedString } from './rng.js?v=7f0c24d0';
-import { CoordBoard, axisColor, axisName } from './coordboard.js?v=7f0c24d0';
-import { confirmDialog, isDialogOpen } from './ui.js?v=7f0c24d0';
-import { installStarfield } from './starfield.js?v=7f0c24d0';
-import { sound, armSound } from './sound.js?v=7f0c24d0';
+import { makeCoordPuzzle } from './puzzle.js?v=abefea4d';
+import { randomSeedString } from './rng.js?v=abefea4d';
+import { CoordBoard, axisColor, axisName } from './coordboard.js?v=abefea4d';
+import { confirmDialog, isDialogOpen } from './ui.js?v=abefea4d';
+import { installStarfield } from './starfield.js?v=abefea4d';
+import { sound, armSound } from './sound.js?v=abefea4d';
 
 const $ = (id) => document.getElementById(id);
 const RANK = 2;     // チュートリアルは 2 次元固定 (迷路の絵が描ける最大が 3 次元、
@@ -148,7 +148,8 @@ class Tutorial {
     this.moves = 0;
     this.won = false;
     this.blockedEdge = null;
-    this.visited.add(0);
+    // 本編と同じく、通った印も消してまっさらにする
+    this.visited = new Set([0]);
     this.render();
   }
 
@@ -162,8 +163,8 @@ class Tutorial {
     if (this.moves === 0) { this.reset(); return; }
     const ok = await confirmDialog({
       title: '最初からやり直しますか？',
-      body: `いま ${this.moves} 手まで進んでいます。スタート地点に戻り、手数が消えます`
-          + '（迷路と、通ったことのある印はそのまま残ります）。',
+      body: `いま ${this.moves} 手まで進んでいます。スタート地点に戻り、手数と`
+          + '通ったことのある印が消えます（迷路そのものは同じままです）。',
       okLabel: '最初からにする',
     });
     if (ok) this.reset();
