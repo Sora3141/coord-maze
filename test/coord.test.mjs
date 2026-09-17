@@ -130,5 +130,15 @@ for (const [rank, width] of [[4, 10], [6, 9], [8, 8], [10, 5], [9, 10], [10, 10]
     + `行ける状態 ${nodes[0]} / 生成 ${worst.toFixed(1)}ms`);
 }
 
+// ------------------------------------------------- 読み込み URL の版
+
+// ブラウザは古い JS / CSS を握り続けるので、読み込み URL には中身のハッシュを
+// 付けてある (tools/stamp.mjs)。付け直し忘れをここで捕まえる。
+const { stampAll } = await import('../tools/stamp.mjs');
+const stamp = stampAll({ write: false });
+check(stamp.outdated.length === 0,
+  `読み込み URL の版が古い: ${stamp.outdated.join(', ')} (node tools/stamp.mjs を実行してください)`);
+console.log(`\n読み込み URL の版: ?v=${stamp.version}`);
+
 console.log(fails === 0 ? '\nすべて合格' : `\n${fails} 件の不具合`);
 process.exit(fails === 0 ? 0 : 1);

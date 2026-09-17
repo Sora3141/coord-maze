@@ -1,6 +1,6 @@
-import { MazeND } from './mazend.js';
-import { RouteMaze } from './routemaze.js';
-import { hashSeed } from './rng.js';
+import { MazeND } from './mazend.js?v=c535b22a';
+import { RouteMaze } from './routemaze.js?v=c535b22a';
+import { hashSeed } from './rng.js?v=c535b22a';
 
 /**
  * 座標迷路 (COORD MAZE) の出題を作る。

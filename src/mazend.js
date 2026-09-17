@@ -1,4 +1,4 @@
-import { mulberry32 } from './rng.js';
+import { mulberry32 } from './rng.js?v=c535b22a';
 
 /**
  * 任意の次元数の格子迷路。
