@@ -1,10 +1,10 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=96beca3a';
-import { randomSeedString } from './rng.js?v=96beca3a';
-import { CoordBoard } from './coordboard.js?v=96beca3a';
-import { confirmDialog, isDialogOpen } from './ui.js?v=96beca3a';
-import { installStarfield } from './starfield.js?v=96beca3a';
-import { saveGame, loadGame, clearGame } from './save.js?v=96beca3a';
-import { sound, armSound } from './sound.js?v=96beca3a';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=7f0c24d0';
+import { randomSeedString } from './rng.js?v=7f0c24d0';
+import { CoordBoard } from './coordboard.js?v=7f0c24d0';
+import { confirmDialog, isDialogOpen } from './ui.js?v=7f0c24d0';
+import { installStarfield } from './starfield.js?v=7f0c24d0';
+import { saveGame, loadGame, clearGame } from './save.js?v=7f0c24d0';
+import { sound, armSound } from './sound.js?v=7f0c24d0';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -232,8 +232,8 @@ class CoordMaze {
     if (this.moves === 0) { this.reset(); return; }
     const ok = await confirmDialog({
       title: '最初からやり直しますか？',
-      body: `いま ${this.moves} 手まで進んでいます。スタート地点に戻り、手数が 0 に戻ります`
-          + '（迷路と、通ったことのある印はそのまま残ります）。',
+      body: `いま ${this.moves} 手まで進んでいます。スタート地点に戻り、手数と`
+          + '通ったことのある印が消えます（迷路そのものは同じままです）。',
       okLabel: '最初からにする',
     });
     if (ok) this.reset();
@@ -264,7 +264,8 @@ class CoordMaze {
     this.startedAt = null;
     this.won = false;
     if (fresh) this.selected = 0;
-    this.visited.add(this.start);
+    // 通った印も消す。まっさらな状態から解き直せるように。
+    this.visited = new Set([this.start]);
     this.render();
   }
 
