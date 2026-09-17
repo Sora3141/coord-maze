@@ -169,6 +169,8 @@ src/sound.js        効果音の合成
 tools/stamp.mjs     読み込み URL に中身のハッシュを付ける (キャッシュ対策)
 ```
 
+これからやりたいことは [TODO.md](TODO.md) に置いてあります。
+
 ```sh
 node test/coord.test.mjs
 ```
