@@ -4,6 +4,7 @@
   --cell: 48px;
   --gap: 8px;
   --label: 34px;   /* 行頭の軸名の幅。JS が盤面の寸法を計算するのにも読む */
+  --rowgap: 12px;  /* 軸名とマス目の間 */
   --edge: 32px;    /* ページ左右の余白 */
 }
 
@@ -62,7 +63,7 @@ main {
   box-shadow: 0 20px 60px -34px #000, inset 0 1px 0 rgba(190, 215, 255, 0.06);
 }
 
-.colhead { display: flex; gap: var(--gap); margin-left: calc(var(--label) + 12px); margin-bottom: 4px; }
+.colhead { display: flex; gap: var(--gap); justify-content: center; margin-bottom: 4px; }
 .colhead div {
   width: var(--cell); text-align: center; color: var(--dim);
   font-size: 10px; letter-spacing: 0.1em; font-variant-numeric: tabular-nums;
@@ -72,8 +73,12 @@ main {
 
 /* 横なぞりは「行を動かす」に使うので、ブラウザの横スクロールには渡さない。
    盤面が横に流れるとき (.scrolls) だけは、指のスクロールを優先する。 */
-.row { display: flex; align-items: center; gap: 12px; cursor: pointer; touch-action: pan-y; }
-#board.scrolls .row { touch-action: auto; }
+.row { display: flex; align-items: center; justify-content: center; gap: var(--rowgap); cursor: pointer; touch-action: pan-y; }
+/* 右側の釣り合いを取るための空き。これがないとマス目が軸名のぶん右にずれる */
+.row::after { content: ''; flex: none; width: var(--label); }
+#board.scrolls .row { touch-action: auto; justify-content: flex-start; }
+#board.scrolls .colhead { justify-content: flex-start; margin-left: calc(var(--label) + var(--rowgap)); }
+#board.scrolls .row::after { display: none; }
 .rowlabel {
   width: var(--label); flex: none; text-align: right;
   font-family: ui-monospace, Menlo, monospace; font-size: 15px;
@@ -247,8 +252,7 @@ button.wide { width: 100%; }
   .stats .coord b { font-size: 14px; }
 
   #board { padding: 14px 12px; border-radius: 12px; width: 100%; }
-  .row { gap: 8px; }
-  .colhead { margin-left: calc(var(--label) + 8px); }
+  :root { --rowgap: 8px; }
   .colhead div { font-size: 9px; }
   .rowlabel { font-size: 13px; }
 

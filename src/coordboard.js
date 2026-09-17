@@ -95,17 +95,18 @@ export class CoordBoard {
     const cs = getComputedStyle(this.host);
     const gap = parseFloat(cs.getPropertyValue('--gap')) || 8;
     const label = parseFloat(cs.getPropertyValue('--label')) || 34;
-    const rowGap = 12;                                  // .row の gap
+    const rowGap = parseFloat(cs.getPropertyValue('--rowgap')) || 12;
     // 盤面は inline-flex で内容ぶんしか広がらないので、置き場所の幅から測る。
     const box = this.host.parentElement;
     const bs = box ? getComputedStyle(box) : null;
     const outer = box
       ? box.clientWidth - parseFloat(bs.paddingLeft) - parseFloat(bs.paddingRight)
       : window.innerWidth;
+    // 軸名とその釣り合いぶん (左右) を引いた残りが、マス目に使える幅。
     const inner = outer
       - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
       - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
-      - label - rowGap;
+      - (label + rowGap) * 2;
 
     // マス数が多いときは大きくしすぎない。指で押せる下限は 30px。
     const max = width >= 11 ? 34 : width >= 9 ? 42 : width >= 7 ? 50 : 58;

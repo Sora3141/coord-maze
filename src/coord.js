@@ -1,9 +1,9 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=110cbb75';
-import { randomSeedString } from './rng.js?v=110cbb75';
-import { CoordBoard } from './coordboard.js?v=110cbb75';
-import { confirmDialog, isDialogOpen } from './ui.js?v=110cbb75';
-import { installStarfield } from './starfield.js?v=110cbb75';
-import { sound, armSound } from './sound.js?v=110cbb75';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=3a556ec8';
+import { randomSeedString } from './rng.js?v=3a556ec8';
+import { CoordBoard } from './coordboard.js?v=3a556ec8';
+import { confirmDialog, isDialogOpen } from './ui.js?v=3a556ec8';
+import { installStarfield } from './starfield.js?v=3a556ec8';
+import { sound, armSound } from './sound.js?v=3a556ec8';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
