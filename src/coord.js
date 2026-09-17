@@ -1,9 +1,9 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=199fe0db';
-import { randomSeedString } from './rng.js?v=199fe0db';
-import { CoordBoard } from './coordboard.js?v=199fe0db';
-import { confirmDialog, isDialogOpen } from './ui.js?v=199fe0db';
-import { installStarfield } from './starfield.js?v=199fe0db';
-import { sound, armSound } from './sound.js?v=199fe0db';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=5665f5ff';
+import { randomSeedString } from './rng.js?v=5665f5ff';
+import { CoordBoard } from './coordboard.js?v=5665f5ff';
+import { confirmDialog, isDialogOpen } from './ui.js?v=5665f5ff';
+import { installStarfield } from './starfield.js?v=5665f5ff';
+import { sound, armSound } from './sound.js?v=5665f5ff';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -22,6 +22,11 @@ class CoordMaze {
   constructor() {
     this.rank = 4;
     this.width = 4;
+    // 設定パネルで選んでいる値。「この設定で作る」を押すまで盤面には反映しない。
+    // (先に反映すると、今の迷路と次元数・マス数が食い違ったまま動かすことになり、
+    //  描画が例外で止まって「動かせる先が出ない」状態になる)
+    this.pickRank = this.rank;
+    this.pickWidth = this.width;
     this.selected = 0;
     this.#initOptions();
     this.#initEvents();
@@ -45,8 +50,8 @@ class CoordMaze {
         host.appendChild(b);
       }
     };
-    build($('opt-rank'), RANKS, (v) => { this.rank = v; });
-    build($('opt-width'), WIDTHS, (v) => { this.width = v; });
+    build($('opt-rank'), RANKS, (v) => { this.pickRank = v; });
+    build($('opt-width'), WIDTHS, (v) => { this.pickWidth = v; });
     this.#syncOptions();
   }
 
@@ -55,25 +60,28 @@ class CoordMaze {
    * 次元数を上げたことで今のマス数が使えなくなったときは、使える最大に落とす。
    */
   #syncOptions() {
-    if (statesOf(this.rank, this.width) > MAX_STATES) {
-      const fit = WIDTHS.filter((w) => statesOf(this.rank, w) <= MAX_STATES);
-      this.width = fit.length ? fit[fit.length - 1] : WIDTHS[0];
+    if (statesOf(this.pickRank, this.pickWidth) > MAX_STATES) {
+      const fit = WIDTHS.filter((w) => statesOf(this.pickRank, w) <= MAX_STATES);
+      this.pickWidth = fit.length ? fit[fit.length - 1] : WIDTHS[0];
     }
     for (const el of $('opt-rank').children) {
       const v = Number(el.dataset.v);
-      el.classList.toggle('on', v === this.rank);
+      el.classList.toggle('on', v === this.pickRank);
       el.disabled = statesOf(v, WIDTHS[0]) > MAX_STATES;
       el.title = el.disabled ? OVER_NOTE : '';
     }
     for (const el of $('opt-width').children) {
       const v = Number(el.dataset.v);
-      el.classList.toggle('on', v === this.width);
-      el.disabled = statesOf(this.rank, v) > MAX_STATES;
+      el.classList.toggle('on', v === this.pickWidth);
+      el.disabled = statesOf(this.pickRank, v) > MAX_STATES;
       el.title = el.disabled ? OVER_NOTE : '';
     }
-    const states = statesOf(this.rank, this.width);
-    $('states').innerHTML = `${this.width}^${this.rank} = ${states.toLocaleString('en-US')} 通り`
-      + '<span>すべての状態に行ける迷路</span>';
+    const states = statesOf(this.pickRank, this.pickWidth);
+    const pending = this.pickRank !== this.rank || this.pickWidth !== this.width;
+    $('states').innerHTML = `${this.pickWidth}^${this.pickRank} = ${states.toLocaleString('en-US')} 通り`
+      + `<span>${pending
+        ? `いまの盤面は ${this.rank} 次元 ${this.width} マス。「この設定で作る」で切り替わります`
+        : 'すべての状態に行ける迷路'}</span>`;
   }
 
   #initEvents() {
@@ -82,7 +90,12 @@ class CoordMaze {
     $('btn-hint').addEventListener('click', () => this.hint());
     $('btn-new').addEventListener('click', () => this.newGame({ seed: randomSeedString() }));
     $('btn-sound').addEventListener('click', () => this.toggleSound());
-    $('btn-apply').addEventListener('click', () => this.newGame({ seed: $('seed').value.trim() }));
+    $('btn-apply').addEventListener('click', () => {
+      // ここで初めて盤面の大きさを入れ替える
+      this.rank = this.pickRank;
+      this.width = this.pickWidth;
+      this.newGame({ seed: $('seed').value.trim() });
+    });
     $('btn-again').addEventListener('click', () => {
       $('win').classList.add('hidden');
       this.newGame({ seed: randomSeedString() });
@@ -93,7 +106,7 @@ class CoordMaze {
       // 確認ダイアログが開いている間は盤面を操作しない。
       if (isDialogOpen()) return;
       if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
-      const n = this.rank;
+      const n = this.maze.rank;
       switch (e.code) {
         case 'ArrowUp': case 'KeyW': this.select((this.selected + n - 1) % n); break;
         case 'ArrowDown': case 'KeyS': this.select((this.selected + 1) % n); break;
@@ -165,7 +178,7 @@ class CoordMaze {
   }
 
   reset(fresh = false) {
-    this.pos = Array(this.rank).fill(0);
+    this.pos = Array(this.maze.rank).fill(0);
     this.history = [];
     this.moves = 0;
     this.elapsed = 0;
@@ -196,9 +209,9 @@ class CoordMaze {
     this.moves++;
     this.history.push({ axis, sign });
     this.visited.add(this.cell);
-    sound.move(axis, this.rank, sign);
+    sound.move(axis, this.maze.rank, sign);
     this.render();
-    if (this.pos.every((c) => c === this.width - 1)) this.#win();
+    if (this.pos.every((c, a) => c === this.maze.dims[a] - 1)) this.#win();
   }
 
   undo() {
@@ -249,7 +262,8 @@ class CoordMaze {
   render() {
     const here = this.cell;
     const candidates = [];
-    for (let a = 0; a < this.rank; a++) {
+    // 次元の数は必ず「今ある迷路」から読む。設定パネルの選択は別物。
+    for (let a = 0; a < this.maze.rank; a++) {
       for (const sign of [1, -1]) {
         const to = this.maze.neighbor(here, a, sign);
         if (to >= 0) candidates.push({ axis: a, sign, seen: this.visited.has(to) });

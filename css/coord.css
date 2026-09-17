@@ -126,11 +126,17 @@ main {
   background: color-mix(in srgb, var(--rowc) 14%, transparent);
   box-shadow: 0 0 18px -5px var(--rowc), inset 0 0 14px -8px var(--rowc);
 }
-.cell.can.been { border-color: rgba(122, 156, 224, 0.36); background: rgba(122, 156, 224, 0.05); }
+/* 通ったことのある状態へ戻る手。暗くしすぎると「行き先が出ていない」ように見えるので、
+   素のマスとははっきり差をつける。 */
+.cell.can.been {
+  border-color: rgba(150, 180, 235, 0.62);
+  background: rgba(122, 156, 224, 0.10);
+  box-shadow: inset 0 0 12px -6px rgba(170, 200, 255, 0.9);
+}
 .cell.can.been::after {
   content: ''; position: absolute; left: 50%; top: 50%;
-  width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px;
-  border-radius: 50%; background: rgba(150, 180, 230, 0.6);
+  width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; background: rgba(185, 210, 255, 0.85);
 }
 @media (hover: hover) {
   .cell.can:hover { filter: brightness(1.45); }

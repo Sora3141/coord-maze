@@ -145,6 +145,9 @@ export class CoordBoard {
   #addSwipe(row, axis) {
     let sx = 0, sy = 0, live = false;
     row.addEventListener('pointerdown', (e) => {
+      // 指でなぞったときは、そのあとに click が来ない。ここで必ず落としておかないと
+      // 前のスワイプの印が残り続けて、次のタップが 1 回食べられる。
+      this.swiped = false;
       live = this.swipeEnabled !== false;
       sx = e.clientX; sy = e.clientY;
     });
