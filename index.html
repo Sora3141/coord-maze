@@ -12,8 +12,8 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="stylesheet" href="css/space.css?v=6490ea4e" />
-<link rel="stylesheet" href="css/coord.css?v=6490ea4e" />
+<link rel="stylesheet" href="css/space.css?v=199fe0db" />
+<link rel="stylesheet" href="css/coord.css?v=199fe0db" />
 </head>
 <body>
 
@@ -106,11 +106,10 @@
       表しているので、次元数を増やしても表示は 1 行増えるだけです。
     </p>
     <p class="note">
-      1 万通りまでの盤面は、<b>すべての状態に行ける</b>ふつうの迷路です。
-      それより広い盤面 (いちばん大きい 10 次元 10 マスは <b>100 億通り</b>) は、
-      全部に行ける迷路にすると遊び切れない —— 迷路である以上、状態の数だけ
-      探し回ることになるためです。そこで広い空間の中に<b>道と枝で迷路を作り</b>、
-      その道の上を遊びます。「到達した状態」の分母が、その迷路の大きさです。
+      迷路は<b>すべての状態がつながった</b>ふつうの迷路です。行けない場所はありません。
+      いちばん大きい <b>7 次元 7 マス</b>は 82 万通りの状態があり、最短でも 350 手を超えます。
+      状態数は「マス数 ^ 次元数」で増えるので、120 万通りを超える組み合わせは選べません
+      （迷路である以上、正しい道を見つけるには状態の数だけ探し回ることになるためです）。
     </p>
     </details>
   </aside>
@@ -130,6 +129,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/coord.js?v=6490ea4e"></script>
+<script type="module" src="./src/coord.js?v=199fe0db"></script>
 </body>
 </html>
