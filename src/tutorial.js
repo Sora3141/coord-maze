@@ -1,9 +1,9 @@
-import { makeCoordPuzzle } from './puzzle.js?v=ede31b1f';
-import { randomSeedString } from './rng.js?v=ede31b1f';
-import { CoordBoard, axisColor, axisName } from './coordboard.js?v=ede31b1f';
-import { confirmDialog, isDialogOpen } from './ui.js?v=ede31b1f';
-import { installStarfield } from './starfield.js?v=ede31b1f';
-import { sound, armSound } from './sound.js?v=ede31b1f';
+import { makeCoordPuzzle } from './puzzle.js?v=63d6a994';
+import { randomSeedString } from './rng.js?v=63d6a994';
+import { CoordBoard, axisColor, axisName } from './coordboard.js?v=63d6a994';
+import { confirmDialog, isDialogOpen } from './ui.js?v=63d6a994';
+import { installStarfield } from './starfield.js?v=63d6a994';
+import { sound, armSound } from './sound.js?v=63d6a994';
 
 const $ = (id) => document.getElementById(id);
 const RANK = 2;     // チュートリアルは 2 次元固定 (迷路の絵が描ける最大が 3 次元、

@@ -1,5 +1,5 @@
-import { MazeND } from './mazend.js?v=ede31b1f';
-import { hashSeed } from './rng.js?v=ede31b1f';
+import { MazeND } from './mazend.js?v=63d6a994';
+import { hashSeed } from './rng.js?v=63d6a994';
 
 /**
  * 座標迷路 (COORD MAZE) の出題を作る。

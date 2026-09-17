@@ -235,6 +235,8 @@ aside a { color: var(--ion); }
 .opts button { flex: 1 0 auto; min-width: 46px; padding: 8px 4px; font-variant-numeric: tabular-nums; }
 .opts button:disabled { opacity: 0.22; cursor: not-allowed; }
 button.wide { width: 100%; }
+/* 設定の先頭に置く効果音の切り替え */
+button.sound { margin-bottom: 16px; }
 .states { margin: -6px 0 16px; color: var(--dim); font-size: 11px; font-family: ui-monospace, Menlo, monospace; }
 /* 状態数の下に「どんな迷路になるか」を 1 行で出す */
 .states span { display: block; margin-top: 4px; font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; }
@@ -321,17 +323,17 @@ button.wide { width: 100%; }
     position: sticky; bottom: 0; z-index: 6;
     margin: 16px calc(var(--edge) * -1) 0;
     padding: 9px var(--edge) max(9px, calc(6px + env(safe-area-inset-bottom)));
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
     background: rgba(4, 6, 15, 0.86);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--line);
   }
   .controls button { padding: 11px 4px; font-size: 12px; }
+  /* よく使う順に、左上から: 1手戻す / ヒント / 最初から / 別の問題 */
   #btn-undo  { grid-area: 1 / 1; }
   #btn-hint  { grid-area: 1 / 2; }
-  #btn-new   { grid-area: 1 / 3; }
   #btn-reset { grid-area: 2 / 1; }
-  #btn-sound { grid-area: 2 / 2 / auto / span 2; }
+  #btn-new   { grid-area: 2 / 2; }
 
   /* キーボードのない端末では、ボタンのキー表示は意味がないので消す */
   kbd { display: none; }
