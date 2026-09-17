@@ -1,9 +1,9 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=3a556ec8';
-import { randomSeedString } from './rng.js?v=3a556ec8';
-import { CoordBoard } from './coordboard.js?v=3a556ec8';
-import { confirmDialog, isDialogOpen } from './ui.js?v=3a556ec8';
-import { installStarfield } from './starfield.js?v=3a556ec8';
-import { sound, armSound } from './sound.js?v=3a556ec8';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=ede31b1f';
+import { randomSeedString } from './rng.js?v=ede31b1f';
+import { CoordBoard } from './coordboard.js?v=ede31b1f';
+import { confirmDialog, isDialogOpen } from './ui.js?v=ede31b1f';
+import { installStarfield } from './starfield.js?v=ede31b1f';
+import { sound, armSound } from './sound.js?v=ede31b1f';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -103,8 +103,8 @@ class CoordMaze {
     $('btn-close').addEventListener('click', () => $('win').classList.add('hidden'));
 
     window.addEventListener('keydown', (e) => {
-      // 確認ダイアログが開いている間は盤面を操作しない。
-      if (isDialogOpen()) return;
+      // 確認ダイアログや引き出しが開いている間は盤面を操作しない。
+      if (isDialogOpen() || document.body.classList.contains('menu-open')) return;
       if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       const n = this.maze.rank;
       switch (e.code) {
@@ -278,6 +278,26 @@ class CoordMaze {
 }
 
 /**
+ * 狭い画面では、ルール・設定・説明を右から出る引き出しにしまう。
+ * 盤面と操作ボタンだけの画面にして、必要なときだけ開く。
+ */
+function installMenu() {
+  const body = document.body;
+  const btn = $('btn-menu');
+  const open = (on) => {
+    body.classList.toggle('menu-open', on);
+    btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    if (on) $('side').scrollTop = 0;
+  };
+  btn.addEventListener('click', () => open(!body.classList.contains('menu-open')));
+  $('btn-menu-close').addEventListener('click', () => open(false));
+  $('scrim').addEventListener('click', () => open(false));
+  // 設定を反映したら用は済んでいるので閉じる
+  $('btn-apply').addEventListener('click', () => open(false));
+  window.addEventListener('keydown', (e) => { if (e.code === 'Escape') open(false); });
+}
+
+/**
  * 狭い画面では右カラムの説明をたたんでおく (設定はいつでも開いたまま)。
  * 畳み直すのは画面幅が変わったときだけ。自分で開いたものを勝手に閉じない。
  */
@@ -294,5 +314,6 @@ function foldSections() {
 
 installStarfield();
 armSound();
+installMenu();
 foldSections();
 window.coordMaze = new CoordMaze();

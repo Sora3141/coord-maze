@@ -185,6 +185,32 @@ main {
 
 .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
 
+/* ------------------------------------------------- メニュー (狭い画面用) */
+
+/* 広い画面では右カラムをそのまま出すので、ボタンも背景も要らない */
+.menu-btn, .scrim, .side-head { display: none; }
+
+.menu-btn {
+  position: absolute; right: var(--edge); top: 30px;
+  align-items: center; gap: 9px;
+  padding: 10px 14px; font-size: 13px;
+}
+/* ハンバーガー (3 本線) */
+.bars, .bars::before, .bars::after {
+  content: ''; display: block; width: 16px; height: 2px; border-radius: 2px;
+  background: currentColor; transition: transform 0.18s, opacity 0.18s;
+}
+.bars { position: relative; }
+.bars::before { position: absolute; top: -5px; }
+.bars::after { position: absolute; top: 5px; }
+body.menu-open .bars { background: transparent; }
+body.menu-open .bars::before { transform: translateY(5px) rotate(45deg); }
+body.menu-open .bars::after { transform: translateY(-5px) rotate(-45deg); }
+
+.side-head { align-items: center; gap: 10px; margin-bottom: 4px; }
+.side-head .btnlink { flex: 1; margin-top: 0; }
+.side-head .close { flex: none; width: 44px; padding: 0; font-size: 16px; line-height: 1; }
+
 /* -------------------------------------------------------------- 右カラム */
 
 aside { padding: 22px 24px; }
@@ -232,6 +258,41 @@ button.wide { width: 100%; }
 @media (max-width: 1000px) {
   :root { --edge: 18px; --gap: 6px; }
   main { grid-template-columns: minmax(0, 1fr); }
+
+  /* 画面はパズルと操作ボタンだけにして、説明と設定は引き出しにしまう */
+  .backs { display: none; }
+  .side-head { display: flex; }
+
+  /* タイトルとメニューを 1 行に並べる (絶対配置だと狭い画面で重なる) */
+  header { display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; }
+  h1 { flex: 1 1 auto; min-width: 0; }
+  .tagline { flex: 1 0 100%; order: 3; }
+  .menu-btn { display: inline-flex; position: static; flex: none; margin-left: auto; }
+
+  aside {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 30;
+    width: min(400px, 92vw);
+    border-radius: 0; border-right: 0; border-top: 0; border-bottom: 0;
+    overflow-y: auto; overscroll-behavior: contain;
+    padding: max(18px, env(safe-area-inset-top)) 18px
+             max(18px, calc(12px + env(safe-area-inset-bottom)));
+    transform: translateX(101%);
+    transition: transform 0.22s cubic-bezier(0.3, 0.9, 0.35, 1);
+    box-shadow: -24px 0 60px -30px #000;
+  }
+  body.menu-open aside { transform: none; }
+  body.menu-open { overflow: hidden; }
+
+  body.menu-open .scrim {
+    display: block; position: fixed; inset: 0; z-index: 25;
+    background: rgba(3, 5, 12, 0.6);
+    backdrop-filter: blur(3px);
+    animation: overlay-in 0.2s ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  aside { transition: none; }
 }
 
 @media (max-width: 700px) {
@@ -241,8 +302,7 @@ button.wide { width: 100%; }
   header { padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: 4px; }
   h1 { font-size: 24px; }
   .tagline { font-size: 12px; margin-top: 4px; }
-  .backs { position: static; margin-top: 12px; }
-  .back { flex: 1; text-align: center; padding: 11px 12px; }
+  .menu-btn { padding: 9px 12px; }
 
   main { padding-top: 14px; padding-bottom: 28px; gap: 18px; }
 
@@ -298,6 +358,13 @@ button.wide { width: 100%; }
   /* 設定の選択肢は指で押せる大きさに */
   .opts { gap: 5px; }
   .opts button { min-width: 42px; padding: 9px 2px; }
+}
+
+/* いちばん狭い画面では、メニューは三本線だけにしてタイトルに場所を譲る */
+@media (max-width: 380px) {
+  h1 { font-size: 21px; }
+  .menu-label { display: none; }
+  .menu-btn { padding: 10px 13px; }
 }
 
 /* 横向きで背の低い画面。盤面だけで画面が埋まらないように詰める */

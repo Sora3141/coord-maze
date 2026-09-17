@@ -12,8 +12,8 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="stylesheet" href="css/space.css?v=3a556ec8" />
-<link rel="stylesheet" href="css/coord.css?v=3a556ec8" />
+<link rel="stylesheet" href="css/space.css?v=ede31b1f" />
+<link rel="stylesheet" href="css/coord.css?v=ede31b1f" />
 </head>
 <body>
 
@@ -23,6 +23,10 @@
   <div class="backs">
     <a class="back" href="tutorial.html">はじめての方へ（チュートリアル）</a>
   </div>
+  <!-- 画面が狭いときだけ出る。ルール・設定・説明はこの中にしまう -->
+  <button id="btn-menu" class="menu-btn" aria-expanded="false" aria-controls="side">
+    <span class="bars" aria-hidden="true"></span><span class="menu-label">ルール・設定</span>
+  </button>
 </header>
 
 <main>
@@ -45,7 +49,12 @@
     </div>
   </section>
 
-  <aside>
+  <aside id="side">
+    <div class="side-head">
+      <a class="btnlink primary" href="tutorial.html">はじめての方へ（チュートリアル）</a>
+      <button id="btn-menu-close" class="close" aria-label="閉じる">✕</button>
+    </div>
+
     <details class="sec" open>
     <summary><h2>ルール</h2></summary>
     <p>
@@ -115,6 +124,8 @@
   </aside>
 </main>
 
+<div id="scrim" class="scrim"></div>
+
 <div id="win" class="overlay hidden">
   <div class="sheet">
     <h2>クリア</h2>
@@ -129,6 +140,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/coord.js?v=3a556ec8"></script>
+<script type="module" src="./src/coord.js?v=ede31b1f"></script>
 </body>
 </html>
