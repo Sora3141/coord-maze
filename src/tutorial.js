@@ -1,4 +1,4 @@
-import { makeCoordPuzzle } from './mazend.js';
+import { makeCoordPuzzle } from './puzzle.js';
 import { randomSeedString } from './rng.js';
 import { CoordBoard, axisColor, axisName } from './coordboard.js';
 import { confirmDialog, isDialogOpen } from './ui.js';

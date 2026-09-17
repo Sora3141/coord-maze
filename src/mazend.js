@@ -1,4 +1,4 @@
-import { mulberry32, hashSeed } from './rng.js';
+import { mulberry32 } from './rng.js';
 
 /**
  * 任意の次元数の格子迷路。
@@ -21,6 +21,10 @@ export class MazeND {
       stride *= n;
     }
     this.size = stride;
+    // 全域木なのでどの状態にも行ける。始点は全次元 0、終点は全次元 n-1。
+    this.start = 0;
+    this.goal = stride - 1;
+    this.reachable = stride;
     this.seed = seed;
     this.braid = braid;
     // links[axis][i] === 1 なら部屋 i と (i + strides[axis]) の間に通路がある。
@@ -153,32 +157,4 @@ export class MazeND {
     }
     return null;
   }
-}
-
-/**
- * 座標迷路 (COORD MAZE) の出題を作る。
- *
- * 全次元 0 から全次元 width-1 へ運ぶパズルなので、最短手数が直線距離
- * (= rank * (width-1)) と同じだと「全部まとめて右に押すだけ」で解けてしまう。
- * 盤面が小さいほどそうなりやすい (2 次元 3 マスだと約 9 割) ため、
- * 遠回りが必要な問題が出るまでシードを送る。シード文字列から決定論的に
- * 導くので、同じ入力なら必ず同じ問題になる。
- */
-export function makeCoordPuzzle({ rank, width, seedText, maxAttempts = 80 }) {
-  const dims = Array(rank).fill(width);
-  const manhattan = rank * (width - 1);
-  let fallback = null;
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const maze = new MazeND({
-      dims,
-      seed: hashSeed(`${seedText}/${rank}x${width}#${attempt}`),
-      braid: 0, // ループを作ると最短手数が直線距離まで落ちてパズルにならない
-    });
-    const par = maze.path(0, maze.size - 1).length - 1;
-    const result = { maze, par, manhattan, detour: par - manhattan, attempts: attempt + 1 };
-    if (!fallback) fallback = result;
-    if (par > manhattan) return result;
-  }
-  return fallback;
 }

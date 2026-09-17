@@ -1,17 +1,12 @@
-import { makeCoordPuzzle } from './mazend.js';
+import { makeCoordPuzzle, statesOf } from './puzzle.js';
 import { randomSeedString } from './rng.js';
 import { CoordBoard } from './coordboard.js';
 import { confirmDialog, isDialogOpen } from './ui.js';
 import { installStarfield } from './starfield.js';
 import { sound, armSound } from './sound.js';
 
-const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-const WIDTHS = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
-// 状態数 = マス数 ^ 次元数 で爆発する。この上限なら生成はブラウザで 1 秒ほど。
-// 超える組み合わせはボタンを押せなくする。
-const MAX_STATES = 1_200_000;
-const statesOf = (rank, width) => width ** rank;
+const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+const WIDTHS = [3, 4, 5, 6, 7, 8, 9, 10];
 
 const $ = (id) => document.getElementById(id);
 
@@ -52,24 +47,13 @@ class CoordMaze {
     this.#syncOptions();
   }
 
-  /**
-   * 選択状態を塗り直し、状態数が上限を超える組み合わせを押せなくする。
-   * 次元数を上げたことで今のマス数が使えなくなったときは、使える最大に落とす。
-   */
+  /** 選択状態を塗り直し、その組み合わせの状態数を出す。 */
   #syncOptions() {
-    if (statesOf(this.rank, this.width) > MAX_STATES) {
-      const fit = WIDTHS.filter((w) => statesOf(this.rank, w) <= MAX_STATES);
-      this.width = fit.length ? fit[fit.length - 1] : WIDTHS[0];
-    }
     for (const el of $('opt-rank').children) {
-      const v = Number(el.dataset.v);
-      el.classList.toggle('on', v === this.rank);
-      el.disabled = statesOf(v, WIDTHS[0]) > MAX_STATES;
+      el.classList.toggle('on', Number(el.dataset.v) === this.rank);
     }
     for (const el of $('opt-width').children) {
-      const v = Number(el.dataset.v);
-      el.classList.toggle('on', v === this.width);
-      el.disabled = statesOf(this.rank, v) > MAX_STATES;
+      el.classList.toggle('on', Number(el.dataset.v) === this.width);
     }
     $('states').textContent =
       `${this.width}^${this.rank} = ${statesOf(this.rank, this.width).toLocaleString('en-US')} 状態`;
@@ -115,22 +99,16 @@ class CoordMaze {
 
   // ------------------------------------------------------------------ 出題
 
-  async newGame({ seed }) {
+  newGame({ seed }) {
     $('win').classList.add('hidden');
-    // 大きい盤面は生成に 1 秒近くかかる。先に表示を更新して 1 フレーム描かせる。
-    const heavy = statesOf(this.rank, this.width) > 100_000;
-    if (heavy) {
-      $('states').textContent = '生成中…';
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    }
     this.seedText = seed || randomSeedString();
     $('seed').value = this.seedText;
     const puzzle = makeCoordPuzzle({ rank: this.rank, width: this.width, seedText: this.seedText });
     this.maze = puzzle.maze;
     this.par = puzzle.par;
     this.detour = puzzle.detour;
-    this.start = 0;                    // 全次元 0
-    this.goal = this.maze.size - 1;    // 全次元 width-1
+    this.start = this.maze.start;      // 全次元 0
+    this.goal = this.maze.goal;        // 全次元 width-1
     this.visited = new Set();
     this.#buildBoard();
     this.reset(true);
@@ -258,7 +236,7 @@ class CoordMaze {
     this.board.render({ pos: this.pos, selected: this.selected, candidates });
 
     $('moves').textContent = `${this.moves}`;
-    $('seen').textContent = `${this.visited.size} / ${this.maze.size}`;
+    $('seen').textContent = `${this.visited.size} / ${this.maze.reachable.toLocaleString('en-US')}`;
     $('coord').textContent = `(${this.pos.join(', ')})`;
   }
 }
