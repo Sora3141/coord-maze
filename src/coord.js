@@ -1,9 +1,9 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=5665f5ff';
-import { randomSeedString } from './rng.js?v=5665f5ff';
-import { CoordBoard } from './coordboard.js?v=5665f5ff';
-import { confirmDialog, isDialogOpen } from './ui.js?v=5665f5ff';
-import { installStarfield } from './starfield.js?v=5665f5ff';
-import { sound, armSound } from './sound.js?v=5665f5ff';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=110cbb75';
+import { randomSeedString } from './rng.js?v=110cbb75';
+import { CoordBoard } from './coordboard.js?v=110cbb75';
+import { confirmDialog, isDialogOpen } from './ui.js?v=110cbb75';
+import { installStarfield } from './starfield.js?v=110cbb75';
+import { sound, armSound } from './sound.js?v=110cbb75';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -209,7 +209,7 @@ class CoordMaze {
     this.moves++;
     this.history.push({ axis, sign });
     this.visited.add(this.cell);
-    sound.move(axis, this.maze.rank, sign);
+    sound.move(axis, sign);
     this.render();
     if (this.pos.every((c, a) => c === this.maze.dims[a] - 1)) this.#win();
   }

@@ -1,9 +1,9 @@
-import { makeCoordPuzzle } from './puzzle.js?v=5665f5ff';
-import { randomSeedString } from './rng.js?v=5665f5ff';
-import { CoordBoard, axisColor, axisName } from './coordboard.js?v=5665f5ff';
-import { confirmDialog, isDialogOpen } from './ui.js?v=5665f5ff';
-import { installStarfield } from './starfield.js?v=5665f5ff';
-import { sound, armSound } from './sound.js?v=5665f5ff';
+import { makeCoordPuzzle } from './puzzle.js?v=110cbb75';
+import { randomSeedString } from './rng.js?v=110cbb75';
+import { CoordBoard, axisColor, axisName } from './coordboard.js?v=110cbb75';
+import { confirmDialog, isDialogOpen } from './ui.js?v=110cbb75';
+import { installStarfield } from './starfield.js?v=110cbb75';
+import { sound, armSound } from './sound.js?v=110cbb75';
 
 const $ = (id) => document.getElementById(id);
 const RANK = 2;     // チュートリアルは 2 次元固定 (迷路の絵が描ける最大が 3 次元、
@@ -191,7 +191,7 @@ class Tutorial {
     if (sign < 0) this.wentBack = true;
     this.history.push({ axis, sign });
     this.visited.add(this.cell);
-    sound.move(axis, RANK, sign);
+    sound.move(axis, sign);
     if (this.pos[0] === WIDTH - 1 && this.pos[1] === WIDTH - 1) { this.won = true; sound.win(); }
     this.render();
     if (this.won) setTimeout(() => $('done').classList.remove('hidden'), 500);

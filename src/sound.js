@@ -4,13 +4,15 @@
  * 方針:
  *  - 宇宙らしい響きにしたいので、手続きで作った残響を通す
  *  - 座標を動かす音は「次元ごとに音程を変える」。どの軸を動かしたかが耳で分かる
- *  - 音程はペンタトニックに乗せるので、何次元でも、どの順に鳴らしても濁らない
+ *  - 音程は必ずドレミファソラシド (長音階) の上に置く。音階から外れた高さや、
+ *    高さの間を滑らせる音 (ポルタメント) は、それだけで濁って聞こえる
  *  - ブラウザの自動再生制限があるので、最初の操作まで AudioContext を作らない
  */
 
 const STORAGE_KEY = 'coordmaze.sound';
-const PENTA = [0, 2, 4, 7, 9]; // 長音階から 4 度と 7 度を抜いた音の並び
-const BASE_HZ = 262;           // C4
+// ドレミファソラシド (長音階) の半音の並び。軸ごとに 1 音ずつ上がる。
+const MAJOR = [0, 2, 4, 5, 7, 9, 11];
+const BASE_HZ = 261.63;        // C4 (ド)。A4 = 440Hz の音律
 
 let ctx = null;
 let master = null;
@@ -83,14 +85,12 @@ function connect(node, send, pan = 0) {
   }
 }
 
-function tone({ freq, dur = 0.22, type = 'sine', gain = 0.5, slideTo = null, slideTime = null,
-                send = 0.5, at = null, pan = 0 }) {
+function tone({ freq, dur = 0.22, type = 'sine', gain = 0.5, send = 0.5, at = null, pan = 0 }) {
   const t = at ?? slot();
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, t);
-  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + (slideTime ?? dur));
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
@@ -123,13 +123,15 @@ function noise({ dur = 0.2, from = 900, to = 300, q = 2, gain = 0.4, send = 0.4,
   src.stop(t + dur + 0.05);
 }
 
-/** 軸番号 → 周波数。ペンタトニックを下から順に割り当てる。 */
-function axisHz(index, total) {
+/**
+ * 軸番号 → 周波数。ドから順に 1 音ずつ上げていく。
+ * 10 次元なら ド レ ミ ファ ソ ラ シ ド レ ミ。どれも音階の上なので、
+ * どの順に鳴らしても、重なっても濁らない。
+ */
+function axisHz(index) {
   const i = Math.max(0, index);
-  const semi = PENTA[i % PENTA.length] + 12 * Math.floor(i / PENTA.length);
-  // 次元数が多いときは音域が上がりすぎないよう少し下げる
-  const shift = total > 8 ? -12 : 0;
-  return BASE_HZ * Math.pow(2, (semi + shift) / 12);
+  const semi = MAJOR[i % MAJOR.length] + 12 * Math.floor(i / MAJOR.length);
+  return BASE_HZ * Math.pow(2, semi / 12);
 }
 
 // state を見て弾かない。まだ resume 前でも予約しておけば、
@@ -155,39 +157,45 @@ export const sound = {
   },
 
   /**
-   * 座標をひとつ動かした。音程はその次元のもので、左右どちらへ動いても同じ高さ。
+   * 座標をひとつ動かした。音程はその軸の音 (ドレミ…) ちょうど。
    *
-   * 左向きを低い音にすると「戻っている」ように聞こえるが、
-   * 座標が 1 減るだけで戻る手とは限らないので、高さでは区別しない。
-   * 区別するのは「音の来る向き」と「その音程への入り方」の 2 つだけ:
-   *   右へ … 右から鳴り、下から音程へ上がって届く
-   *   左へ … 左から鳴り、上から音程へ下りて届く
-   * どちらも最後は同じ高さに着くので、明るさも音量も変わらない。
+   * 左右は「同じ 2 音を鳴らす順番」で表す:
+   *   右へ … その軸の音 → 1 オクターブ上   (上がっていく)
+   *   左へ … 1 オクターブ上 → その軸の音   (下りてくる)
+   * 使う高さは左右で同じなので、どちらかが低く (＝後戻りに) 聞こえることはない。
+   * 音の来る向きも左右に振って、耳でも向きが分かるようにしてある。
+   *
+   * 以前はここで「1 音ぶん下から滑り込ませる」ことで向きを出していたが、
+   * 滑っている間は音階から外れた高さが鳴るので、濁って聞こえていた。
    */
-  move(index, total, dir) {
+  move(index, dir) {
     play(() => {
-      const hz = axisHz(index, total);
+      const hz = axisHz(index);
       const right = dir > 0;
-      // 左右に振ると、まとめて 1 つのスピーカーで鳴らしたときに小さくなるぶん、
-      // 他の音 (壁・クリアなど) と釣り合うように少し持ち上げてある。
       const pan = right ? 0.35 : -0.35;
-      tone({ freq: hz * (right ? 0.94 : 1.06), slideTo: hz, slideTime: 0.07,
-             dur: 0.26, type: 'triangle', gain: 0.42, send: 0.55, pan });
-      tone({ freq: hz * 2, dur: 0.14, type: 'sine', gain: 0.14, send: 0.4, at: lastAt, pan });
+      const t = slot();
+      const first = right ? hz : hz * 2;
+      const second = right ? hz * 2 : hz;
+      tone({ freq: first, dur: 0.26, type: 'triangle', gain: 0.40, send: 0.55, at: t, pan });
+      tone({ freq: second, dur: 0.20, type: 'sine', gain: 0.18, send: 0.45, at: t + 0.055, pan });
     });
   },
 
-  /** 壁にぶつかった。 */
+  /** 壁にぶつかった。ぶつかった感じを出すノイズと、低いド。 */
   blocked() {
     play(() => {
       noise({ dur: 0.13, from: 420, to: 130, q: 1.2, gain: 0.26, send: 0.2 });
-      tone({ freq: 96, dur: 0.14, type: 'sine', gain: 0.24, send: 0.15, at: lastAt });
+      tone({ freq: BASE_HZ / 2, dur: 0.14, type: 'sine', gain: 0.24, send: 0.15, at: lastAt });
     });
   },
 
-  /** 1 手戻した。 */
+  /** 1 手戻した。ソ → ド と下りる (滑らせず、音階の上を 2 音で)。 */
   undo() {
-    play(() => tone({ freq: 300, slideTo: 190, dur: 0.16, type: 'sine', gain: 0.20, send: 0.35 }));
+    play(() => {
+      const t = slot();
+      tone({ freq: BASE_HZ * Math.pow(2, 7 / 12), dur: 0.14, type: 'sine', gain: 0.20, send: 0.35, at: t });
+      tone({ freq: BASE_HZ, dur: 0.18, type: 'sine', gain: 0.18, send: 0.35, at: t + 0.06 });
+    });
   },
 
   /** ヒント。 */
@@ -198,22 +206,6 @@ export const sound = {
         tone({ freq: BASE_HZ * 2 * Math.pow(2, s / 12), dur: 0.5, type: 'sine',
                gain: 0.12, send: 0.8, at: t0 + k * 0.05 }));
     });
-  },
-
-  /** 建物 (w 軸) の移動。この作品の要なので、いちばん印象に残る音にする。 */
-  warp(dir) {
-    play(() => {
-      const t = slot();
-      const up = dir > 0;
-      noise({ dur: 0.62, from: up ? 240 : 2600, to: up ? 3000 : 200, q: 3.5, gain: 0.30, send: 0.9, at: t });
-      tone({ freq: up ? 150 : 700, slideTo: up ? 700 : 150, dur: 0.6, type: 'triangle', gain: 0.22, send: 0.9, at: t });
-      tone({ freq: up ? 600 : 300, dur: 0.9, type: 'sine', gain: 0.10, send: 1.0, at: t + 0.12 });
-    });
-  },
-
-  /** 部屋をひとつ移った (3D 迷路)。ごく小さく。 */
-  step() {
-    play(() => noise({ dur: 0.06, from: 1700, to: 850, q: 1.4, gain: 0.11, send: 0.2 }));
   },
 
   /** 手順やチェックの達成。 */
@@ -237,9 +229,9 @@ export const sound = {
     });
   },
 
-  /** ボタンなどの小さな反応。 */
+  /** ボタンなどの小さな反応。1 オクターブ上のミ。 */
   ui() {
-    play(() => tone({ freq: 660, dur: 0.09, type: 'sine', gain: 0.14, send: 0.3 }));
+    play(() => tone({ freq: BASE_HZ * 2 * Math.pow(2, 4 / 12), dur: 0.09, type: 'sine', gain: 0.14, send: 0.3 }));
   },
 };
 
