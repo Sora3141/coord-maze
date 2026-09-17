@@ -76,7 +76,7 @@ function reachableStates(m) {
 // ------------------------------------------------- 格子全体で作る小さい盤面
 
 console.log('格子全体の迷路 (すべての状態がつながる)');
-for (const [rank, width] of [[2, 3], [3, 4], [4, 4], [4, 5], [5, 4], [6, 3], [2, 10]]) {
+for (const [rank, width] of [[2, 3], [3, 4], [4, 4], [4, 5], [5, 4], [6, 3], [2, 10], [3, 2], [6, 2], [10, 2]]) {
   const lens = [];
   for (const seedText of ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']) {
     const puzzle = makeCoordPuzzle({ rank, width, seedText });

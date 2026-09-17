@@ -6,7 +6,13 @@ import { installStarfield } from './starfield.js';
 import { sound, armSound } from './sound.js';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
-const WIDTHS = [3, 4, 5, 6, 7, 8, 9, 10];
+const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+// 2 次元 2 マスだけは、どう作ってもまっすぐ 2 手で解けてしまう。
+// 4 つの状態が輪になっているだけなので、輪から 1 本抜いた道のどこを切っても
+// 対角どうしは 2 手の距離。遠回りのしようがないので、この組み合わせは選べなくする。
+const PUZZLE_NOTE = '2 次元 2 マスは、どう作ってもまっすぐ 2 手で解けてしまいます';
+const playable = (rank, width) => rank > 2 || width > 2;
 
 const $ = (id) => document.getElementById(id);
 
@@ -49,12 +55,16 @@ class CoordMaze {
 
   /** 選択状態を塗り直し、その組み合わせの状態数を出す。 */
   #syncOptions() {
-    for (const el of $('opt-rank').children) {
-      el.classList.toggle('on', Number(el.dataset.v) === this.rank);
-    }
-    for (const el of $('opt-width').children) {
-      el.classList.toggle('on', Number(el.dataset.v) === this.width);
-    }
+    const mark = (host, current, ok) => {
+      for (const el of host.children) {
+        const v = Number(el.dataset.v);
+        el.classList.toggle('on', v === current);
+        el.disabled = !ok(v);
+        el.title = el.disabled ? PUZZLE_NOTE : '';
+      }
+    };
+    mark($('opt-rank'), this.rank, (v) => playable(v, this.width));
+    mark($('opt-width'), this.width, (v) => playable(this.rank, v));
     $('states').textContent =
       `${this.width}^${this.rank} = ${statesOf(this.rank, this.width).toLocaleString('en-US')} 状態`;
   }
