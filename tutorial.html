@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>COORD MAZE チュートリアル</title>
+<link rel="stylesheet" href="css/space.css" />
+<link rel="stylesheet" href="css/coord.css" />
+<link rel="stylesheet" href="css/tutorial.css" />
+</head>
+<body>
+
+<header>
+  <h1>座標迷路の <span>読み方</span></h1>
+  <p class="tagline">2 次元で、迷路そのものと見比べながら覚える</p>
+  <div class="backs">
+    <a class="back" href="index.html">COORD MAZE へ →</a>
+    <a class="back" href="../4d-maze/index.html">4D MAZE へ →</a>
+  </div>
+</header>
+
+<main>
+  <section id="guide">
+    <ol id="steplist"></ol>
+    <p id="instruction">-</p>
+  </section>
+
+  <div class="pair">
+    <div class="pane">
+      <h2>座標だけで表したもの</h2>
+      <div id="board"></div>
+      <p class="cap">1 行 = 1 つの次元 ／ 横方向 = その次元の座標</p>
+    </div>
+
+    <div class="same"><span>同じもの</span></div>
+
+    <div class="pane">
+      <h2>実際の迷路</h2>
+      <canvas id="maze"></canvas>
+      <p class="cap">x は右へ ／ y は上へ ／ 左下 S から右上 G へ</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div><span>手数</span><b id="moves">0</b></div>
+    <div class="coord"><span>座標</span><b id="coord">-</b></div>
+    <div class="coord"><span>選択中の行</span><b id="selected">-</b></div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-undo">1手戻す <kbd>Z</kbd></button>
+    <button id="btn-reset">最初から <kbd>R</kbd></button>
+    <button id="btn-hint">ヒント <kbd>H</kbd></button>
+    <button id="btn-new">別の問題 <kbd>N</kbd></button>
+    <button id="btn-sound" class="on">効果音 ON <kbd>V</kbd></button>
+  </div>
+
+  <p class="foot">
+    操作：<b>↑↓</b> で行（次元）を選び、<b>←→</b> でその行のコマを動かします。数字キー <b>1</b>／<b>2</b> でも行を選べます。
+    これは COORD MAZE とまったく同じ操作です。左右どちらの図をクリックしても動かせます。
+  </p>
+</main>
+
+<div id="done" class="overlay hidden">
+  <div class="sheet">
+    <h2>これで読めます</h2>
+    <p>
+      左の表と右の迷路は、まったく同じものを別の書き方で表したものです。
+      <b>x の行のコマ＝迷路での横位置、y の行のコマ＝縦位置</b>。
+      1 手でどちらか一方の座標だけが 1 変わり、変われるかどうかは壁が決めています。
+    </p>
+    <p>
+      ここからが本題です。右の絵は <b>3 次元までしか描けません</b>。
+      でも左の表は、次元がいくつ増えても<b>行が 1 本増えるだけ</b>です。
+    </p>
+    <div class="rowgrow">
+      <div><i>2 次元</i><u></u><u></u></div>
+      <div><i>3 次元</i><u></u><u></u><u></u></div>
+      <div><i>4 次元</i><u></u><u></u><u></u><u></u></div>
+      <div><i>6 次元</i><u></u><u></u><u></u><u></u><u></u><u></u></div>
+    </div>
+    <p class="note">
+      COORD MAZE はこれを <b>2〜12 次元</b>でそのまま遊ぶパズルです。
+      4D MAZE は同じ迷路を、3 次元ぶんは歩いて、4 次元目は建物の移動として表したものです。
+    </p>
+    <a class="btnlink primary" href="index.html">COORD MAZE へ</a>
+    <a class="btnlink" href="../4d-maze/index.html">4D MAZE へ</a>
+    <button id="btn-close">このページに戻る</button>
+  </div>
+</div>
+
+<script type="module" src="./src/tutorial.js"></script>
+</body>
+</html>

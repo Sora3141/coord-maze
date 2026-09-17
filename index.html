@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>COORD MAZE — 座標迷路</title>
+<link rel="stylesheet" href="css/space.css" />
+<link rel="stylesheet" href="css/coord.css" />
+</head>
+<body>
+
+<header>
+  <h1>COORD <span>MAZE</span></h1>
+  <p class="tagline">N 次元迷路を、座標だけで表したパズル</p>
+  <div class="backs">
+    <a class="back" href="tutorial.html">はじめての方へ（チュートリアル）</a>
+    <a class="back" href="../4d-maze/index.html">4D MAZE へ →</a>
+  </div>
+</header>
+
+<main>
+  <section id="play">
+    <div class="stats">
+      <div><span>手数</span><b id="moves">0</b></div>
+      <div><span>経過</span><b id="timer">00:00</b></div>
+      <div><span>到達した状態</span><b id="seen">0</b></div>
+      <div class="coord"><span>座標</span><b id="coord">-</b></div>
+    </div>
+
+    <div id="board"></div>
+
+    <div id="hist-wrap">
+      <span>手順</span>
+      <div id="hist"></div>
+    </div>
+
+    <div class="controls">
+      <button id="btn-undo">1手戻す <kbd>Z</kbd></button>
+      <button id="btn-reset">最初から <kbd>R</kbd></button>
+      <button id="btn-hint">ヒント <kbd>H</kbd></button>
+      <button id="btn-new" class="primary">別の問題 <kbd>N</kbd></button>
+      <button id="btn-sound" class="on">効果音 ON <kbd>V</kbd></button>
+    </div>
+  </section>
+
+  <aside>
+    <h2>ルール</h2>
+    <p>
+      1 行が 1 つの<b>次元</b>、横方向がその次元の<b>座標</b>です。
+      各行のコマは、その次元における現在位置を表しています。
+    </p>
+    <p>
+      1 手で動かせるのは<b>どれか 1 行だけ</b>、しかも<b>隣のマスへ 1 つだけ</b>。
+      ただし動けるかどうかは迷路が決めていて、
+      <b>すべての行の位置の組み合わせ</b>によって変わります。
+    </p>
+    <p>
+      全部のコマが<b>いちばん左</b>にある状態から、
+      全部を<b>いちばん右</b>へ運べばクリアです。
+    </p>
+    <p class="note">
+      動かせる先は必ず表示されます。まだ行っていない状態へ進む手は
+      <span class="chip new"></span> 明るい枠、すでに通ったことのある状態へ戻る手は
+      <span class="chip seen"></span> 暗い枠 です。
+      迷路にループはないので、暗い枠だけの行き止まりに入ったら引き返してください。
+    </p>
+
+    <h2>設定</h2>
+    <div class="field">
+      <label>次元数</label>
+      <div class="opts" id="opt-rank"></div>
+    </div>
+    <div class="field">
+      <label>1 次元あたりのマス数</label>
+      <div class="opts" id="opt-width"></div>
+    </div>
+    <p id="states" class="states">-</p>
+    <div class="field">
+      <label for="seed">シード</label>
+      <input id="seed" type="text" maxlength="24" autocomplete="off" />
+    </div>
+    <button id="btn-apply" class="primary wide">この設定で作る</button>
+
+    <h2>はじめての方へ</h2>
+    <p class="note">
+      2 次元で、<a href="tutorial.html">実際の迷路と並べて見比べるチュートリアル</a>があります。
+      表と迷路がどう対応しているかは、そちらを一度見るのが早いです。
+    </p>
+
+    <h2>これは何？</h2>
+    <p class="note">
+      中身は <a href="../4d-maze/index.html">4D MAZE</a> と同じ格子迷路です。あちらは 3 次元ぶんを
+      歩いて 4 次元目を建物の移動で表しましたが、こちらは空間を一切描かず、
+      座標の数字だけを並べています。次元数を増やしても表示は 1 行増えるだけなので、
+      6 次元でもそのまま遊べます。
+    </p>
+  </aside>
+</main>
+
+<div id="win" class="overlay hidden">
+  <div class="sheet">
+    <h2>クリア</h2>
+    <div class="result">
+      <div><span>手数</span><b id="win-moves">-</b></div>
+      <div><span>最短手数</span><b id="win-par">-</b></div>
+      <div><span>タイム</span><b id="win-time">-</b></div>
+      <div><span>シード</span><b id="win-seed">-</b></div>
+    </div>
+    <button id="btn-again" class="primary">別の問題へ</button>
+    <button id="btn-close">閉じる</button>
+  </div>
+</div>
+
+<script type="module" src="./src/coord.js"></script>
+</body>
+</html>

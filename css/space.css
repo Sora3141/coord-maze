@@ -1,0 +1,184 @@
+/* ============================================================================
+   宇宙テーマの共通土台。全ページでいちばん先に読み込む。
+   ここで色・背景・共通パーツ (オーバーレイ / パネル / ボタン) を決め、
+   各ページの CSS はレイアウト固有のことだけを書く。
+   ========================================================================== */
+
+:root {
+  /* 地の色。真っ黒ではなく、わずかに青紫を含ませて宇宙の暗がりにする */
+  --void: #04060f;
+  --deep: #070b18;
+
+  --ink: #dce6f7;
+  --dim: #7b8bab;
+  --line: rgba(122, 156, 224, 0.20);
+  --panel: rgba(9, 14, 28, 0.66);
+
+  /* アクセントは天体の色から取る */
+  --ion: #6ff0ff;      /* 主アクセント: イオンの青 */
+  --nebula: #b06bff;   /* 星雲の紫 */
+  --plasma: #ff5fa2;   /* 桃色の星雲 */
+  --star: #ffd98a;     /* 恒星の金 */
+  --accent: var(--ion);
+
+  --glow: 0 0 24px -6px;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html { height: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--void);
+  color: var(--ink);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 星雲。大きく淡い光を何枚か重ねて、平らな黒さを消す */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% -12%, rgba(96, 62, 196, 0.26), transparent 62%),
+    radial-gradient(ellipse 70% 52% at 90% 6%, rgba(22, 122, 184, 0.20), transparent 64%),
+    radial-gradient(ellipse 96% 70% at 46% 118%, rgba(150, 40, 140, 0.18), transparent 62%),
+    radial-gradient(circle at 72% 62%, rgba(40, 92, 200, 0.10), transparent 56%);
+}
+
+/* 周辺減光。中央に視線を集める */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 42%, transparent 42%, rgba(2, 4, 10, 0.62) 100%);
+}
+
+#stars {
+  position: fixed; inset: 0; z-index: -1;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ パネル */
+
+.glass, .sheet, aside, .panel, .pane, #guide {
+  background:
+    linear-gradient(rgba(140, 180, 255, 0.055), rgba(140, 180, 255, 0) 42%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px) saturate(115%);
+  box-shadow: 0 18px 50px -28px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(190, 215, 255, 0.07);
+}
+
+/* ---------------------------------------------------------------- 見出し */
+
+h1, h2, h3 { font-weight: 700; }
+h1 { letter-spacing: 0.14em; }
+.title-glow { text-shadow: 0 0 28px rgba(111, 240, 255, 0.35); }
+
+/* -------------------------------------------------------------- ボタン */
+
+button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(130, 170, 240, 0.05);
+  color: var(--ink);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.16s, color 0.16s, background 0.16s, box-shadow 0.16s;
+}
+button:hover:not(:disabled) {
+  border-color: var(--ion);
+  color: var(--ion);
+  box-shadow: var(--glow) rgba(111, 240, 255, 0.55);
+}
+button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
+
+button.primary {
+  background: linear-gradient(135deg, var(--ion), #59c8ff 60%, var(--nebula));
+  border-color: transparent;
+  color: #04121a;
+  font-weight: 700;
+  box-shadow: 0 10px 30px -14px rgba(111, 240, 255, 0.9);
+}
+button.primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  color: #04121a;
+  box-shadow: 0 12px 34px -12px rgba(111, 240, 255, 1);
+}
+button.on { border-color: var(--ion); color: var(--ion); background: rgba(111, 240, 255, 0.10); }
+
+/* リンクをボタンと同じ見た目にするもの */
+.btnlink {
+  display: block; text-align: center; text-decoration: none;
+  padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+  background: rgba(130, 170, 240, 0.05);
+  color: var(--ink); margin-top: 10px; transition: 0.16s;
+}
+.btnlink:hover { border-color: var(--ion); color: var(--ion); box-shadow: var(--glow) rgba(111, 240, 255, 0.5); }
+.btnlink.primary {
+  background: linear-gradient(135deg, var(--ion), #59c8ff 60%, var(--nebula));
+  border-color: transparent; color: #04121a; font-weight: 700;
+  box-shadow: 0 10px 30px -14px rgba(111, 240, 255, 0.9);
+}
+.btnlink.primary:hover { filter: brightness(1.1); color: #04121a; }
+
+kbd {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0 4px;
+  font-size: 10px;
+  color: var(--dim);
+  margin-left: 5px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+/* ---------------------------------------------------------- オーバーレイ */
+
+.overlay {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 34%, rgba(46, 34, 96, 0.55), transparent 62%),
+    rgba(3, 5, 12, 0.82);
+  backdrop-filter: blur(6px);
+  animation: overlay-in 0.22s ease-out;
+}
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+.hidden { display: none !important; }
+
+.sheet {
+  width: min(560px, calc(100vw - 40px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  padding: 28px 30px;
+  animation: sheet-in 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes sheet-in { from { transform: translateY(10px) scale(0.985); opacity: 0; } to { transform: none; opacity: 1; } }
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: rgba(4, 7, 16, 0.75);
+  color: var(--ink);
+  font-family: ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--ion);
+  box-shadow: var(--glow) rgba(111, 240, 255, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay, .sheet { animation: none; }
+}
