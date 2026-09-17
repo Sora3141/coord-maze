@@ -26,15 +26,15 @@ export class CoordBoard {
     this.onSelect = opts.onSelect || (() => {});
     this.heads = opts.heads;
     this.pos = Array(this.rank).fill(0);
+    this.swiped = false;
     this.#build();
+    this.fit();
+    this.#watchSize();
   }
 
   #build() {
     const { rank, width } = this;
     this.host.innerHTML = '';
-    // マス数が多いときはセルを小さくする。横スクロールさせるより一覧できる方がよい。
-    this.host.style.setProperty('--cell',
-      width >= 11 ? '34px' : width >= 9 ? '42px' : width >= 7 ? '50px' : '58px');
 
     const head = document.createElement('div');
     head.className = 'colhead';
@@ -52,7 +52,8 @@ export class CoordBoard {
       const row = document.createElement('div');
       row.className = 'row';
       row.style.setProperty('--rowc', axisColor(a, rank));
-      row.addEventListener('click', () => this.onSelect(a));
+      row.addEventListener('click', () => { if (!this.#tookSwipe()) this.onSelect(a); });
+      this.#addSwipe(row, a);
 
       const label = document.createElement('div');
       label.className = 'rowlabel';
@@ -67,6 +68,7 @@ export class CoordBoard {
         cell.className = 'cell' + (c === 0 ? ' start' : c === width - 1 ? ' goal' : '');
         cell.addEventListener('click', (e) => {
           e.stopPropagation();
+          if (this.#tookSwipe()) return;
           const d = c - this.pos[a];
           if (Math.abs(d) === 1) this.onMove(a, d); else this.onSelect(a);
         });
@@ -80,6 +82,88 @@ export class CoordBoard {
       this.host.appendChild(row);
       this.rows.push({ row, cells, token });
     }
+  }
+
+  // ------------------------------------------------------ 画面幅に合わせる
+
+  /**
+   * セルの大きさを画面幅から決める。スマホでは横スクロールさせずに
+   * 盤面全体が一目で入ることを優先し、それでも入らないときだけ横に流す。
+   */
+  fit() {
+    const { width } = this;
+    const cs = getComputedStyle(this.host);
+    const gap = parseFloat(cs.getPropertyValue('--gap')) || 8;
+    const label = parseFloat(cs.getPropertyValue('--label')) || 34;
+    const rowGap = 12;                                  // .row の gap
+    // 盤面は inline-flex で内容ぶんしか広がらないので、置き場所の幅から測る。
+    const box = this.host.parentElement;
+    const bs = box ? getComputedStyle(box) : null;
+    const outer = box
+      ? box.clientWidth - parseFloat(bs.paddingLeft) - parseFloat(bs.paddingRight)
+      : window.innerWidth;
+    const inner = outer
+      - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+      - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
+      - label - rowGap;
+
+    // マス数が多いときは大きくしすぎない。指で押せる下限は 30px。
+    const max = width >= 11 ? 34 : width >= 9 ? 42 : width >= 7 ? 50 : 58;
+    const room = Math.floor((inner - gap * (width - 1)) / width);
+    const cell = Math.max(30, Math.min(max, room));
+    this.host.style.setProperty('--cell', `${cell}px`);
+
+    // 収まりきらず横スクロールになる場合は、スワイプを指のスクロールに譲る。
+    const overflow = cell * width + gap * (width - 1) > inner + 1;
+    this.host.classList.toggle('scrolls', overflow);
+    this.swipeEnabled = !overflow;
+  }
+
+  /** 作り直すときに呼ぶ。監視を残さない。 */
+  destroy() {
+    if (this.ro) this.ro.disconnect();
+    if (this.onResize) window.removeEventListener('resize', this.onResize);
+  }
+
+  #watchSize() {
+    const box = this.host.parentElement;
+    if (box && typeof ResizeObserver !== 'undefined') {
+      this.ro = new ResizeObserver(() => this.fit());
+      this.ro.observe(box);
+    } else {
+      this.onResize = () => this.fit();
+      window.addEventListener('resize', this.onResize);
+    }
+  }
+
+  // -------------------------------------------------------------- スワイプ
+
+  /**
+   * 行を左右になぞってもコマを動かせるようにする。
+   * マス目が小さいスマホでは、隣のマスを正確に押すより速い。
+   */
+  #addSwipe(row, axis) {
+    let sx = 0, sy = 0, live = false;
+    row.addEventListener('pointerdown', (e) => {
+      live = this.swipeEnabled !== false;
+      sx = e.clientX; sy = e.clientY;
+    });
+    row.addEventListener('pointerup', (e) => {
+      if (!live) return;
+      live = false;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) < 24 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+      // 直後に飛んでくる click は、スワイプの結果なので食べておく。
+      this.swiped = true;
+      this.onMove(axis, dx > 0 ? 1 : -1);
+    });
+    row.addEventListener('pointercancel', () => { live = false; });
+  }
+
+  #tookSwipe() {
+    if (!this.swiped) return false;
+    this.swiped = false;
+    return true;
   }
 
   /**
@@ -105,6 +189,7 @@ export class CoordBoard {
 
   /** 壁にぶつかったことを一瞬だけ見せる。 */
   bump(axis) {
+    if (navigator.vibrate) navigator.vibrate(18);
     const t = this.rows[axis].token;
     t.classList.remove('bump');
     void t.offsetWidth;

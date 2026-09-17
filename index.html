@@ -2,8 +2,16 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#04060f" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="COORD MAZE" />
 <title>COORD MAZE — 座標迷路</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="manifest" href="manifest.webmanifest" />
 <link rel="stylesheet" href="css/space.css" />
 <link rel="stylesheet" href="css/coord.css" />
 </head>
@@ -43,7 +51,8 @@
   </section>
 
   <aside>
-    <h2>ルール</h2>
+    <details class="sec" open>
+    <summary><h2>ルール</h2></summary>
     <p>
       1 行が 1 つの<b>次元</b>、横方向がその次元の<b>座標</b>です。
       各行のコマは、その次元における現在位置を表しています。
@@ -63,8 +72,14 @@
       <span class="chip seen"></span> 暗い枠 です。
       迷路にループはないので、暗い枠だけの行き止まりに入ったら引き返してください。
     </p>
+    <p class="note">
+      動かすには、コマの<b>隣のマスをタップ</b>するか、その<b>行を左右にスワイプ</b>します。
+      キーボードがあれば ↑↓ で行を選び、←→ で動かせます。
+    </p>
+    </details>
 
-    <h2>設定</h2>
+    <details class="sec" open data-keep="open">
+    <summary><h2>設定</h2></summary>
     <div class="field">
       <label>次元数</label>
       <div class="opts" id="opt-rank"></div>
@@ -79,19 +94,24 @@
       <input id="seed" type="text" maxlength="24" autocomplete="off" />
     </div>
     <button id="btn-apply" class="primary wide">この設定で作る</button>
+    </details>
 
-    <h2>はじめての方へ</h2>
+    <details class="sec" open>
+    <summary><h2>はじめての方へ</h2></summary>
     <p class="note">
       2 次元で、<a href="tutorial.html">実際の迷路と並べて見比べるチュートリアル</a>があります。
       表と迷路がどう対応しているかは、そちらを一度見るのが早いです。
     </p>
+    </details>
 
-    <h2>これは何？</h2>
+    <details class="sec" open>
+    <summary><h2>これは何？</h2></summary>
     <p class="note">
       中身は N 次元の格子迷路です。空間を一切描かず、座標の数字だけを並べて
       表しているので、次元数を増やしても表示は 1 行増えるだけです。
       6 次元でもそのまま遊べます。
     </p>
+    </details>
   </aside>
 </main>
 

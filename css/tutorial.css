@@ -29,7 +29,7 @@ main { display: block; max-width: 1180px; margin: 0 auto; }
 .pane h2 { margin: 0 0 14px; font-size: 13px; letter-spacing: 0.08em; color: var(--dim); }
 .pane .cap { margin: 12px 0 0; font-size: 11px; color: var(--dim); line-height: 1.7; }
 .pane #board { background: none; border: 0; border-radius: 0; padding: 0; }
-#maze { display: block; }
+#maze { display: block; max-width: 100%; height: auto; touch-action: manipulation; }
 
 .same {
   align-self: center; color: var(--dim); font-size: 11px; letter-spacing: 0.1em;
@@ -64,4 +64,17 @@ main { display: block; max-width: 1180px; margin: 0 auto; }
 @media (max-width: 860px) {
   .same { display: none; }
   .pair { flex-direction: column; }
+  .pane { width: 100%; }
+}
+
+@media (max-width: 700px) {
+  main { max-width: none; }
+  #guide { padding: 14px 16px; margin-bottom: 16px; }
+  #instruction { font-size: 14px; line-height: 1.85; }
+  .pair { gap: 14px; }
+  .pane { padding: 14px 14px 12px; }
+  .pane h2 { margin-bottom: 10px; }
+  .foot { margin-bottom: 20px; }
+  .rowgrow i { width: 42px; }
+  .rowgrow u { width: auto; flex: 1; }
 }

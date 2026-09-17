@@ -139,6 +139,7 @@ class CoordMaze {
   }
 
   #buildBoard() {
+    if (this.board) this.board.destroy();
     this.board = new CoordBoard($('board'), {
       rank: this.rank,
       width: this.width,
@@ -277,6 +278,22 @@ class CoordMaze {
   }
 }
 
+/**
+ * 狭い画面では右カラムの説明をたたんでおく (設定はいつでも開いたまま)。
+ * 畳み直すのは画面幅が変わったときだけ。自分で開いたものを勝手に閉じない。
+ */
+function foldSections() {
+  const narrow = window.matchMedia('(max-width: 700px)');
+  const apply = () => {
+    for (const d of document.querySelectorAll('details.sec')) {
+      d.open = !narrow.matches || d.dataset.keep === 'open';
+    }
+  };
+  apply();
+  narrow.addEventListener('change', apply);
+}
+
 installStarfield();
 armSound();
+foldSections();
 window.coordMaze = new CoordMaze();

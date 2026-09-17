@@ -11,6 +11,20 @@ const WIDTH = 4;    //  並べて見比べるなら 2 次元がいちばん分�
 const CS = 62;      // 迷路 1 マスの大きさ (px)
 const PAD = 30;
 
+// 操作の言い方は端末に合わせる。指で遊ぶ人に「← を押す」と書いても伝わらない。
+const TOUCH = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+const SAY = TOUCH ? {
+  move: '<b>コマの隣のマスをタップ</b>するか、その<b>行を左右にスワイプ</b>します',
+  otherRow: '<b>もう一方の行</b>を触って',
+  tryPush: '<b>スワイプしてみてください</b>',
+  goBack: '<b>左どなりのマスをタップして座標を 1 減らす手</b>を使ってみましょう',
+} : {
+  move: '<b>↑↓ で行を選び、←→ でその行のコマを動かします</b>',
+  otherRow: '<b>↑↓ で行を切り替えて</b>',
+  tryPush: '<b>← か →</b> を押してみてください',
+  goBack: '<b>← を押して座標を 1 減らす手</b>を使ってみましょう',
+};
+
 const COL_X = axisColor(0, RANK);
 const COL_Y = axisColor(1, RANK);
 const BAND_X = axisColor(0, RANK, 0.07);   // 左の表の行と同じ色でないと対応が読めない
@@ -23,26 +37,26 @@ const STEPS = [
     title: '見比べる',
     hint: '右の迷路の <b>●</b> があなたです。左の <b>x の行</b>のコマが迷路での<b>横位置</b>、'
         + '<b>y の行</b>のコマが<b>縦位置</b>を表しています。'
-        + '<b>↑↓ で行を選び、←→ でその行のコマを動かします</b>。'
+        + `${SAY.move}。`
         + 'まず 1 手動かして、左右が一緒に動くのを見てください。',
     done: (s) => s.moves >= 1,
   },
   {
     title: '1 手で動くのは 1 つの座標だけ',
     hint: '1 手で変えられるのは <b>どちらか一方の座標だけ</b>です。'
-        + '<b>↑↓ で行を切り替えて</b>、まだ動かしていない方の軸も動かしてみましょう。',
+        + `${SAY.otherRow}、まだ動かしていない方の軸も動かしてみましょう。`,
     done: (s) => s.movedAxes.size >= 2,
   },
   {
     title: '壁にぶつかる',
     hint: '動ける向きには<b>矢印</b>が出ています。矢印の出ていない向きへ '
-        + '<b>← か →</b> を押してみてください。迷路の壁に阻まれて動けないことが分かります。',
+        + `${SAY.tryPush}。迷路の壁に阻まれて動けないことが分かります。`,
     done: (s) => s.bumped,
   },
   {
     title: '座標を減らす',
     hint: 'ゴールは右上ですが、まっすぐには行けません。'
-        + '<b>← を押して座標を 1 減らす手</b>を使ってみましょう。'
+        + `${SAY.goBack}。`
         + '迷路では左か下へ戻ることになります。',
     done: (s) => s.wentBack,
   },
@@ -82,8 +96,10 @@ class Tutorial {
 
     this.canvas.addEventListener('click', (e) => {
       const r = this.canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - r.left - PAD) / CS);
-      const y = WIDTH - 1 - Math.floor((e.clientY - r.top - PAD) / CS);
+      // 画面が狭いと絵は縮めて表示される。押された点を元の寸法に戻してから読む。
+      const scale = r.width / (PAD * 2 + CS * WIDTH);
+      const x = Math.floor(((e.clientX - r.left) / scale - PAD) / CS);
+      const y = WIDTH - 1 - Math.floor(((e.clientY - r.top) / scale - PAD) / CS);
       if (x < 0 || x >= WIDTH || y < 0 || y >= WIDTH) return;
       const dx = x - this.pos[0], dy = y - this.pos[1];
       if (Math.abs(dx) + Math.abs(dy) !== 1) return;

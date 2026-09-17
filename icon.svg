@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- COORD MAZE のアイコン。4 行 = 4 次元、光っているのが各行のコマ。 -->
+  <defs>
+    <radialGradient id="bg" cx="30%" cy="14%" r="95%">
+      <stop offset="0%" stop-color="#16214a"/>
+      <stop offset="60%" stop-color="#070b18"/>
+      <stop offset="100%" stop-color="#04060f"/>
+    </radialGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <g fill="none" stroke="#7a9ce0" stroke-opacity="0.22" stroke-width="3">
+    <g id="cells">
+      <rect x="64"  y="96"  width="76" height="76" rx="20"/>
+      <rect x="156" y="96"  width="76" height="76" rx="20"/>
+      <rect x="248" y="96"  width="76" height="76" rx="20"/>
+      <rect x="340" y="96"  width="76" height="76" rx="20"/>
+      <rect x="64"  y="188" width="76" height="76" rx="20"/>
+      <rect x="156" y="188" width="76" height="76" rx="20"/>
+      <rect x="248" y="188" width="76" height="76" rx="20"/>
+      <rect x="340" y="188" width="76" height="76" rx="20"/>
+      <rect x="64"  y="280" width="76" height="76" rx="20"/>
+      <rect x="156" y="280" width="76" height="76" rx="20"/>
+      <rect x="248" y="280" width="76" height="76" rx="20"/>
+      <rect x="340" y="280" width="76" height="76" rx="20"/>
+      <rect x="64"  y="372" width="76" height="76" rx="20"/>
+      <rect x="156" y="372" width="76" height="76" rx="20"/>
+      <rect x="248" y="372" width="76" height="76" rx="20"/>
+      <rect x="340" y="372" width="76" height="76" rx="20"/>
+    </g>
+  </g>
+
+  <!-- ゴール列 -->
+  <g fill="#ffd98a" fill-opacity="0.10" stroke="#ffd98a" stroke-opacity="0.5" stroke-width="3">
+    <rect x="340" y="96"  width="76" height="76" rx="20"/>
+    <rect x="340" y="188" width="76" height="76" rx="20"/>
+    <rect x="340" y="280" width="76" height="76" rx="20"/>
+    <rect x="340" y="372" width="76" height="76" rx="20"/>
+  </g>
+
+  <!-- 各行のコマ -->
+  <g filter="url(#glow)">
+    <circle cx="102" cy="134" r="28" fill="#6ff0ff"/>
+    <circle cx="194" cy="226" r="28" fill="#b06bff"/>
+    <circle cx="286" cy="318" r="28" fill="#ff5fa2"/>
+    <circle cx="194" cy="410" r="28" fill="#c8f06f"/>
+  </g>
+</svg>

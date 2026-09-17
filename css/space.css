@@ -37,6 +37,11 @@ body {
   font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  /* スマホ: 横向きで文字が勝手に太らないように、引っぱっても更新されないように */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 星雲。大きく淡い光を何枚か重ねて、平らな黒さを消す */
@@ -92,13 +97,17 @@ button {
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.16s, color 0.16s, background 0.16s, box-shadow 0.16s;
+  touch-action: manipulation;
+  transition: border-color 0.16s, color 0.16s, background 0.16s, box-shadow 0.16s, transform 0.08s;
 }
-button:hover:not(:disabled) {
-  border-color: var(--ion);
-  color: var(--ion);
-  box-shadow: var(--glow) rgba(111, 240, 255, 0.55);
+@media (hover: hover) {
+  button:hover:not(:disabled) {
+    border-color: var(--ion);
+    color: var(--ion);
+    box-shadow: var(--glow) rgba(111, 240, 255, 0.55);
+  }
 }
+button:active:not(:disabled) { transform: scale(0.97); border-color: var(--ion); color: var(--ion); }
 button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 
 button.primary {
@@ -108,11 +117,14 @@ button.primary {
   font-weight: 700;
   box-shadow: 0 10px 30px -14px rgba(111, 240, 255, 0.9);
 }
-button.primary:hover:not(:disabled) {
-  filter: brightness(1.1);
-  color: #04121a;
-  box-shadow: 0 12px 34px -12px rgba(111, 240, 255, 1);
+@media (hover: hover) {
+  button.primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    color: #04121a;
+    box-shadow: 0 12px 34px -12px rgba(111, 240, 255, 1);
+  }
 }
+button.primary:active:not(:disabled) { color: #04121a; }
 button.on { border-color: var(--ion); color: var(--ion); background: rgba(111, 240, 255, 0.10); }
 
 /* リンクをボタンと同じ見た目にするもの */
@@ -121,14 +133,19 @@ button.on { border-color: var(--ion); color: var(--ion); background: rgba(111, 2
   padding: 12px; border-radius: 10px; border: 1px solid var(--line);
   background: rgba(130, 170, 240, 0.05);
   color: var(--ink); margin-top: 10px; transition: 0.16s;
+  touch-action: manipulation;
 }
-.btnlink:hover { border-color: var(--ion); color: var(--ion); box-shadow: var(--glow) rgba(111, 240, 255, 0.5); }
+@media (hover: hover) {
+  .btnlink:hover { border-color: var(--ion); color: var(--ion); box-shadow: var(--glow) rgba(111, 240, 255, 0.5); }
+}
 .btnlink.primary {
   background: linear-gradient(135deg, var(--ion), #59c8ff 60%, var(--nebula));
   border-color: transparent; color: #04121a; font-weight: 700;
   box-shadow: 0 10px 30px -14px rgba(111, 240, 255, 0.9);
 }
-.btnlink.primary:hover { filter: brightness(1.1); color: #04121a; }
+@media (hover: hover) {
+  .btnlink.primary:hover { filter: brightness(1.1); color: #04121a; }
+}
 
 kbd {
   border: 1px solid var(--line);
@@ -138,6 +155,10 @@ kbd {
   color: var(--dim);
   margin-left: 5px;
   font-family: ui-monospace, Menlo, monospace;
+}
+
+@media (pointer: coarse) {
+  button, .btnlink { min-height: 46px; font-size: 14px; }
 }
 
 /* ---------------------------------------------------------- オーバーレイ */
@@ -155,10 +176,12 @@ kbd {
 .hidden { display: none !important; }
 
 .sheet {
-  width: min(560px, calc(100vw - 40px));
-  max-height: calc(100vh - 40px);
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(calc(100vh - 32px), calc(100dvh - 32px));
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 28px 30px;
+  padding-bottom: max(28px, calc(18px + env(safe-area-inset-bottom)));
   animation: sheet-in 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 @keyframes sheet-in { from { transform: translateY(10px) scale(0.985); opacity: 0; } to { transform: none; opacity: 1; } }
