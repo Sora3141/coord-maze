@@ -65,33 +65,42 @@ function slot() {
   return lastAt;
 }
 
-function connect(node, send) {
-  node.connect(master);
+function connect(node, send, pan = 0) {
+  // pan は音の来る向き (-1 左 / +1 右)。対応していないブラウザでは中央のまま鳴らす。
+  let out = node;
+  if (pan && ctx.createStereoPanner) {
+    const p = ctx.createStereoPanner();
+    p.pan.value = pan;
+    node.connect(p);
+    out = p;
+  }
+  out.connect(master);
   if (send > 0) {
     const g = ctx.createGain();
     g.gain.value = send;
-    node.connect(g);
+    out.connect(g);
     g.connect(wet);
   }
 }
 
-function tone({ freq, dur = 0.22, type = 'sine', gain = 0.5, slideTo = null, send = 0.5, at = null }) {
+function tone({ freq, dur = 0.22, type = 'sine', gain = 0.5, slideTo = null, slideTime = null,
+                send = 0.5, at = null, pan = 0 }) {
   const t = at ?? slot();
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, t);
-  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + (slideTime ?? dur));
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   osc.connect(g);
-  connect(g, send);
+  connect(g, send, pan);
   osc.start(t);
   osc.stop(t + dur + 0.05);
 }
 
-function noise({ dur = 0.2, from = 900, to = 300, q = 2, gain = 0.4, send = 0.4, at = null }) {
+function noise({ dur = 0.2, from = 900, to = 300, q = 2, gain = 0.4, send = 0.4, at = null, pan = 0 }) {
   const t = at ?? slot();
   const n = Math.floor(ctx.sampleRate * dur);
   const buf = ctx.createBuffer(1, n, ctx.sampleRate);
@@ -109,7 +118,7 @@ function noise({ dur = 0.2, from = 900, to = 300, q = 2, gain = 0.4, send = 0.4,
   g.gain.exponentialRampToValueAtTime(gain, t + 0.02);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   src.connect(f); f.connect(g);
-  connect(g, send);
+  connect(g, send, pan);
   src.start(t);
   src.stop(t + dur + 0.05);
 }
@@ -145,19 +154,26 @@ export const sound = {
     return enabled;
   },
 
-  /** 座標をひとつ動かした。音程が次元、明るさが向き。 */
+  /**
+   * 座標をひとつ動かした。音程はその次元のもので、左右どちらへ動いても同じ高さ。
+   *
+   * 左向きを低い音にすると「戻っている」ように聞こえるが、
+   * 座標が 1 減るだけで戻る手とは限らないので、高さでは区別しない。
+   * 区別するのは「音の来る向き」と「その音程への入り方」の 2 つだけ:
+   *   右へ … 右から鳴り、下から音程へ上がって届く
+   *   左へ … 左から鳴り、上から音程へ下りて届く
+   * どちらも最後は同じ高さに着くので、明るさも音量も変わらない。
+   */
   move(index, total, dir) {
     play(() => {
       const hz = axisHz(index, total);
-      if (dir > 0) {
-        tone({ freq: hz, dur: 0.26, type: 'triangle', gain: 0.30, send: 0.55 });
-        tone({ freq: hz * 2, dur: 0.14, type: 'sine', gain: 0.10, send: 0.4, at: lastAt });
-      } else {
-        // 戻る手。音程は進む手と同じ高さのまま、下がる動きと丸い音色で区別する。
-        // 1 オクターブ下げるとスマホのスピーカーでは鳴っていないように聞こえる。
-        tone({ freq: hz, slideTo: hz * 0.84, dur: 0.24, type: 'sine', gain: 0.30, send: 0.5 });
-        tone({ freq: hz / 2, dur: 0.20, type: 'sine', gain: 0.12, send: 0.4, at: lastAt });
-      }
+      const right = dir > 0;
+      // 左右に振ると、まとめて 1 つのスピーカーで鳴らしたときに小さくなるぶん、
+      // 他の音 (壁・クリアなど) と釣り合うように少し持ち上げてある。
+      const pan = right ? 0.35 : -0.35;
+      tone({ freq: hz * (right ? 0.94 : 1.06), slideTo: hz, slideTime: 0.07,
+             dur: 0.26, type: 'triangle', gain: 0.42, send: 0.55, pan });
+      tone({ freq: hz * 2, dur: 0.14, type: 'sine', gain: 0.14, send: 0.4, at: lastAt, pan });
     });
   },
 
