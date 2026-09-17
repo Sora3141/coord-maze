@@ -1,9 +1,10 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=63d6a994';
-import { randomSeedString } from './rng.js?v=63d6a994';
-import { CoordBoard } from './coordboard.js?v=63d6a994';
-import { confirmDialog, isDialogOpen } from './ui.js?v=63d6a994';
-import { installStarfield } from './starfield.js?v=63d6a994';
-import { sound, armSound } from './sound.js?v=63d6a994';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=96beca3a';
+import { randomSeedString } from './rng.js?v=96beca3a';
+import { CoordBoard } from './coordboard.js?v=96beca3a';
+import { confirmDialog, isDialogOpen } from './ui.js?v=96beca3a';
+import { installStarfield } from './starfield.js?v=96beca3a';
+import { saveGame, loadGame, clearGame } from './save.js?v=96beca3a';
+import { sound, armSound } from './sound.js?v=96beca3a';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -30,10 +31,19 @@ class CoordMaze {
     this.selected = 0;
     this.#initOptions();
     this.#initEvents();
-    $('seed').value = randomSeedString();
     $('btn-sound').classList.toggle('on', sound.enabled);
     $('btn-sound').innerHTML = `効果音 ${sound.enabled ? 'ON' : 'OFF'} <kbd>V</kbd>`;
-    this.newGame({ seed: $('seed').value });
+
+    // 前に遊んでいた盤面が残っていれば、その続きから始める
+    const saved = loadGame();
+    const usable = saved && RANKS.includes(saved.rank) && WIDTHS.includes(saved.width)
+      && statesOf(saved.rank, saved.width) <= MAX_STATES;
+    if (usable) {
+      this.rank = this.pickRank = saved.rank;
+      this.width = this.pickWidth = saved.width;
+    }
+    $('seed').value = usable ? saved.seed : randomSeedString();
+    this.newGame({ seed: $('seed').value, restore: usable ? saved : null });
     setInterval(() => this.#tick(), 250);
   }
 
@@ -88,9 +98,10 @@ class CoordMaze {
     $('btn-undo').addEventListener('click', () => this.undo());
     $('btn-reset').addEventListener('click', () => this.requestReset());
     $('btn-hint').addEventListener('click', () => this.hint());
-    $('btn-new').addEventListener('click', () => this.newGame({ seed: randomSeedString() }));
+    $('btn-new').addEventListener('click', () => this.requestNewGame());
     $('btn-sound').addEventListener('click', () => this.toggleSound());
-    $('btn-apply').addEventListener('click', () => {
+    $('btn-apply').addEventListener('click', async () => {
+      if (!await this.#confirmDiscard('この設定で作り直しますか？', 'この設定で作る')) return;
       // ここで初めて盤面の大きさを入れ替える
       this.rank = this.pickRank;
       this.width = this.pickWidth;
@@ -101,6 +112,12 @@ class CoordMaze {
       this.newGame({ seed: randomSeedString() });
     });
     $('btn-close').addEventListener('click', () => $('win').classList.add('hidden'));
+
+    // タブを閉じる・別のアプリへ移る瞬間は、待たずに書き込む
+    window.addEventListener('pagehide', () => this.#saveNow());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') this.#saveNow();
+    });
 
     window.addEventListener('keydown', (e) => {
       // 確認ダイアログや引き出しが開いている間は盤面を操作しない。
@@ -115,7 +132,7 @@ class CoordMaze {
         case 'KeyZ': this.undo(); break;
         case 'KeyR': this.requestReset(); break;
         case 'KeyH': this.hint(); break;
-        case 'KeyN': this.newGame({ seed: randomSeedString() }); break;
+        case 'KeyN': this.requestNewGame(); break;
         case 'KeyV': this.toggleSound(); break;
         default: {
           const d = e.code.match(/^Digit([1-9])$/);
@@ -129,7 +146,7 @@ class CoordMaze {
 
   // ------------------------------------------------------------------ 出題
 
-  async newGame({ seed }) {
+  async newGame({ seed, restore = null }) {
     $('win').classList.add('hidden');
     // 大きい盤面は生成に数百 ms かかる。先に表示を更新して 1 フレーム描かせる。
     if (statesOf(this.rank, this.width) > 100_000) {
@@ -147,8 +164,53 @@ class CoordMaze {
     this.visited = new Set();
     this.#buildBoard();
     this.reset(true);
+    // 迷路はシードと大きさから決まるので、par が合っていれば同じ迷路。
+    // (作り方を変えたあとの古い保存を、そのまま当てはめないための確認)
+    if (restore && restore.par === this.par) this.#restoreProgress(restore);
     this.#syncOptions();
+    this.#save();
+  }
 
+  /**
+   * 保存しておいた進みぐあいを今の盤面に当てはめる。
+   * 少しでもおかしければ何もしない (スタート地点のまま始まる)。
+   */
+  #restoreProgress(s) {
+    const { rank, dims } = this.maze;
+    if (!Array.isArray(s.pos) || s.pos.length !== rank) return;
+    if (!s.pos.every((c, a) => Number.isInteger(c) && c >= 0 && c < dims[a])) return;
+
+    this.pos = [...s.pos];
+    this.moves = Number.isFinite(s.moves) ? s.moves : 0;
+    this.elapsed = Number.isFinite(s.elapsed) ? s.elapsed : 0;
+    this.history = Array.isArray(s.history)
+      ? s.history.filter((h) => Array.isArray(h) && h.length === 2).map(([axis, sign]) => ({ axis, sign }))
+      : [];
+    this.selected = Number.isInteger(s.selected) && s.selected < rank ? s.selected : 0;
+    if (Array.isArray(s.visited)) for (const i of s.visited) this.visited.add(i);
+    this.visited.add(this.cell);
+    // 時計は止まっていたぶんを数えない。次の 1 手から続きを刻む。
+    this.startedAt = this.moves > 0 ? performance.now() - this.elapsed * 1000 : null;
+    this.render();
+  }
+
+  // ------------------------------------------------------------------ 保存
+
+  /** 少し待ってから保存する (1 手ごとに書き込まない)。 */
+  #save() {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => this.#saveNow(), 300);
+  }
+
+  #saveNow() {
+    clearTimeout(this.saveTimer);
+    // 解き終わった盤面は覚えておかない。次に開いたら新しい問題から。
+    if (this.won) { clearGame(); return; }
+    saveGame({
+      seed: this.seedText, rank: this.rank, width: this.width, par: this.par,
+      pos: this.pos, moves: this.moves, elapsed: this.elapsed,
+      history: this.history, visited: this.visited, selected: this.selected,
+    });
   }
 
   #buildBoard() {
@@ -175,6 +237,23 @@ class CoordMaze {
       okLabel: '最初からにする',
     });
     if (ok) this.reset();
+  }
+
+  /** ボタンと N キーから呼ぶ「別の問題」。進めた手があるときだけ確認する。 */
+  async requestNewGame() {
+    if (!await this.#confirmDiscard('別の問題にしますか？', '別の問題にする')) return;
+    this.newGame({ seed: randomSeedString() });
+  }
+
+  /** 進みぐあいが消える操作の前に一度だけ止める。まだ 1 手も進めていなければ素通り。 */
+  #confirmDiscard(title, okLabel) {
+    if (this.moves === 0 || this.won) return Promise.resolve(true);
+    return confirmDialog({
+      title,
+      body: `いま ${this.moves} 手まで進んでいます。今の迷路と進みぐあいは消えて、`
+          + '別の迷路になります（この操作は元に戻せません）。',
+      okLabel,
+    });
   }
 
   reset(fresh = false) {
@@ -241,6 +320,7 @@ class CoordMaze {
 
   #win() {
     this.won = true;
+    clearGame();
     sound.win();
     if (this.startedAt !== null) this.elapsed = (performance.now() - this.startedAt) / 1000;
     $('win-moves').textContent = `${this.moves}`;
@@ -274,6 +354,7 @@ class CoordMaze {
     $('moves').textContent = `${this.moves}`;
     $('seen').textContent = `${this.visited.size} / ${this.maze.reachable.toLocaleString('en-US')}`;
     $('coord').textContent = `(${this.pos.join(', ')})`;
+    this.#save();
   }
 }
 
