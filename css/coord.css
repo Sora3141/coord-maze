@@ -197,7 +197,10 @@ aside a { color: var(--ion); }
 .opts { display: flex; gap: 6px; flex-wrap: wrap; }
 .opts button { flex: 1 0 auto; min-width: 46px; padding: 8px 4px; font-variant-numeric: tabular-nums; }
 .opts button:disabled { opacity: 0.22; cursor: not-allowed; }
+button.wide { width: 100%; }
 .states { margin: -6px 0 16px; color: var(--dim); font-size: 11px; font-family: ui-monospace, Menlo, monospace; }
+/* 状態数の下に「どんな迷路になるか」を 1 行で出す */
+.states span { display: block; margin-top: 4px; font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; }
 
 /* ---------------------------------------------------------------- 結果 */
 

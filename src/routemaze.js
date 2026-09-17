@@ -1,4 +1,4 @@
-import { mulberry32 } from './rng.js?v=c535b22a';
+import { mulberry32 } from './rng.js?v=6490ea4e';
 
 /**
  * 広い座標空間のための迷路。

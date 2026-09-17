@@ -12,8 +12,8 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="stylesheet" href="css/space.css?v=c535b22a" />
-<link rel="stylesheet" href="css/coord.css?v=c535b22a" />
+<link rel="stylesheet" href="css/space.css?v=6490ea4e" />
+<link rel="stylesheet" href="css/coord.css?v=6490ea4e" />
 </head>
 <body>
 
@@ -104,8 +104,13 @@
     <p class="note">
       中身は N 次元の格子迷路です。空間を一切描かず、座標の数字だけを並べて
       表しているので、次元数を増やしても表示は 1 行増えるだけです。
-      いちばん大きい <b>10 次元 × 10 マス</b>は、位置の組み合わせが 100 億通り。
-      それでも表は 10 行で、迷路は一瞬でできます。
+    </p>
+    <p class="note">
+      1 万通りまでの盤面は、<b>すべての状態に行ける</b>ふつうの迷路です。
+      それより広い盤面 (いちばん大きい 10 次元 10 マスは <b>100 億通り</b>) は、
+      全部に行ける迷路にすると遊び切れない —— 迷路である以上、状態の数だけ
+      探し回ることになるためです。そこで広い空間の中に<b>道と枝で迷路を作り</b>、
+      その道の上を遊びます。「到達した状態」の分母が、その迷路の大きさです。
     </p>
     </details>
   </aside>
@@ -125,6 +130,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/coord.js?v=c535b22a"></script>
+<script type="module" src="./src/coord.js?v=6490ea4e"></script>
 </body>
 </html>

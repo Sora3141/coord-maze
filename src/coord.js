@@ -1,18 +1,12 @@
-import { makeCoordPuzzle, statesOf } from './puzzle.js?v=c535b22a';
-import { randomSeedString } from './rng.js?v=c535b22a';
-import { CoordBoard } from './coordboard.js?v=c535b22a';
-import { confirmDialog, isDialogOpen } from './ui.js?v=c535b22a';
-import { installStarfield } from './starfield.js?v=c535b22a';
-import { sound, armSound } from './sound.js?v=c535b22a';
+import { makeCoordPuzzle, statesOf, FULL_GRID_LIMIT } from './puzzle.js?v=6490ea4e';
+import { randomSeedString } from './rng.js?v=6490ea4e';
+import { CoordBoard } from './coordboard.js?v=6490ea4e';
+import { confirmDialog, isDialogOpen } from './ui.js?v=6490ea4e';
+import { installStarfield } from './starfield.js?v=6490ea4e';
+import { sound, armSound } from './sound.js?v=6490ea4e';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-// 2 次元 2 マスだけは、どう作ってもまっすぐ 2 手で解けてしまう。
-// 4 つの状態が輪になっているだけなので、輪から 1 本抜いた道のどこを切っても
-// 対角どうしは 2 手の距離。遠回りのしようがないので、この組み合わせは選べなくする。
-const PUZZLE_NOTE = '2 次元 2 マスは、どう作ってもまっすぐ 2 手で解けてしまいます';
-const playable = (rank, width) => rank > 2 || width > 2;
 
 const $ = (id) => document.getElementById(id);
 
@@ -53,20 +47,20 @@ class CoordMaze {
     this.#syncOptions();
   }
 
-  /** 選択状態を塗り直し、その組み合わせの状態数を出す。 */
+  /** 選択状態を塗り直し、その組み合わせの状態数と迷路の作り方を出す。 */
   #syncOptions() {
-    const mark = (host, current, ok) => {
-      for (const el of host.children) {
-        const v = Number(el.dataset.v);
-        el.classList.toggle('on', v === current);
-        el.disabled = !ok(v);
-        el.title = el.disabled ? PUZZLE_NOTE : '';
-      }
+    const mark = (host, current) => {
+      for (const el of host.children) el.classList.toggle('on', Number(el.dataset.v) === current);
     };
-    mark($('opt-rank'), this.rank, (v) => playable(v, this.width));
-    mark($('opt-width'), this.width, (v) => playable(this.rank, v));
-    $('states').textContent =
-      `${this.width}^${this.rank} = ${statesOf(this.rank, this.width).toLocaleString('en-US')} 状態`;
+    mark($('opt-rank'), this.rank);
+    mark($('opt-width'), this.width);
+
+    const states = statesOf(this.rank, this.width);
+    $('states').innerHTML =
+      `${this.width}^${this.rank} = ${states.toLocaleString('en-US')} 通り`
+      + `<span>${states <= FULL_GRID_LIMIT
+        ? 'すべての状態に行ける迷路'
+        : '広すぎるので、この空間に道と枝で作る迷路'}</span>`;
   }
 
   #initEvents() {

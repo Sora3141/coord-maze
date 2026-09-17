@@ -76,7 +76,7 @@ function reachableStates(m) {
 // ------------------------------------------------- 格子全体で作る小さい盤面
 
 console.log('格子全体の迷路 (すべての状態がつながる)');
-for (const [rank, width] of [[2, 3], [3, 4], [4, 4], [4, 5], [5, 4], [6, 3], [2, 10], [3, 2], [6, 2], [10, 2]]) {
+for (const [rank, width] of [[2, 3], [3, 4], [4, 4], [4, 5], [5, 4], [6, 3], [2, 10], [4, 10], [3, 2], [6, 2], [10, 2]]) {
   const lens = [];
   for (const seedText of ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']) {
     const puzzle = makeCoordPuzzle({ rank, width, seedText });
@@ -91,10 +91,20 @@ for (const [rank, width] of [[2, 3], [3, 4], [4, 4], [4, 5], [5, 4], [6, 3], [2,
     + `最短 ${lens.join(', ')} 手 / 直線距離 ${rank * (width - 1)} 手`);
 }
 
+// 2 次元 2 マスだけは、状態が 4 つで輪になっているだけなので、
+// どう作ってもまっすぐ 2 手 (= 直線距離) で解ける。遠回りは作れない。
+{
+  const puzzle = makeCoordPuzzle({ rank: 2, width: 2, seedText: 'AAA' });
+  const m = puzzle.maze;
+  check(puzzle.par === 2, '2次元2マス: 2 手で解けるはず');
+  check(reachableStates(m).size === 4, '2次元2マス: 4 つの状態すべてに行けるはず');
+  console.log('  2次元 × 2マス (状態 4): 最短 2 手 / 直線距離 2 手 (遠回りは作れない盤面)');
+}
+
 // --------------------------------------------- 道を引いて作る広い盤面
 
 console.log('\n道を引く迷路 (広すぎて格子を持てない盤面)');
-for (const [rank, width] of [[4, 10], [6, 9], [8, 8], [10, 5], [9, 10], [10, 10]]) {
+for (const [rank, width] of [[6, 9], [8, 8], [10, 5], [9, 10], [10, 10]]) {
   const lens = [], nodes = [];
   let worst = 0;
   for (const seedText of ['AAA', 'BBB', 'CCC']) {

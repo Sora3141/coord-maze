@@ -1,6 +1,6 @@
-import { MazeND } from './mazend.js?v=c535b22a';
-import { RouteMaze } from './routemaze.js?v=c535b22a';
-import { hashSeed } from './rng.js?v=c535b22a';
+import { MazeND } from './mazend.js?v=6490ea4e';
+import { RouteMaze } from './routemaze.js?v=6490ea4e';
+import { hashSeed } from './rng.js?v=6490ea4e';
 
 /**
  * 座標迷路 (COORD MAZE) の出題を作る。
@@ -19,31 +19,35 @@ import { hashSeed } from './rng.js?v=c535b22a';
  */
 
 /**
- * 格子全体で作るのはここまで。この上は道を引く方式にする。
+ * 格子全体で作る (＝すべての状態に行ける迷路にする) のはここまで。
  *
- * 分かれ目をメモリではなく「最短手数」で決めているのが肝心。格子全体の全域木は
- * 状態数が増えるほど道が長くなり、5 次元 10 マス (10 万状態) では 345 手、
- * 6 次元 8 マス (26 万状態) では 392 手と、大きい盤面ほど遊べない長さになる。
- * しかも道方式の 10 次元 10 マスが 166 手なので、**中くらいの盤面のほうが長い**
- * という逆転まで起きる。
+ * 分かれ目は**遊び切れるかどうか**。すべての状態に行ける迷路は、迷路である以上
+ * 状態数に比例した探索が要る。素朴に遊んだときの手数を測ると、
+ * 1 万状態でおよそ 2,000〜4,000 手。これを超えると現実的に終わらない。
  *
- * この数までなら、どちらの方式でも最短手数はほぼ同じ (5 次元 4 マスで 25 手 対
- * 29 手) なので、ここを境にすれば手数は盤面の大きさに素直について増える。
+ * 壁を配列で持たない作り方 (親を決める関数だけを置いて、格子全体を覆う木を
+ * その場で計算する) も試したが、持てるかどうかは解決しても遊べるかは解決しない。
+ * 10 次元 10 マス (100 億状態) で素朴に遊ぶと、30 万手打っても着かなかった。
+ * 「どの状態にも行ける」と「100 億状態を遊び切る」は両立しない。
+ *
+ * だから広い盤面は、空間を埋めるのをあきらめて、その中に道と枝で迷路を作る。
  */
-export const FULL_GRID_LIMIT = 5_000;
+export const FULL_GRID_LIMIT = 10_000;
 
 export const statesOf = (rank, width) => width ** rank;
 
 /**
  * 広い空間のときの手加減。
  * 戻る手 1 回につき最短手数が 2 増えるので、最短手数はおよそ直線距離の 2 倍になる。
- * 節点数は最短手数の 6 倍。道 1 つぶんに対して枝が 5 つぶら下がる密度。
+ * 節点数は最短手数の 10 倍。道 1 つに対して枝が 9 つぶら下がる密度で、
+ * 10 次元 10 マスなら 2 千状態ほど。素朴に遊んだときの手数がおよそ 1,400 手
+ * (格子全体の迷路を遊び切れる大きさと同じくらい) に収まる。
  */
 function routeParams(rank, width) {
   const manhattan = rank * (width - 1);
   const backtracks = Math.max(2, Math.round(manhattan * 0.45));
   const expected = manhattan + backtracks * 2;
-  return { backtracks, budget: Math.max(150, expected * 6) };
+  return { backtracks, budget: Math.max(150, expected * 10) };
 }
 
 /**
