@@ -166,18 +166,6 @@ main {
   color: rgba(0, 0, 0, 0.62); font-size: 20px; font-weight: 700;
 }
 
-/* ---------------------------------------------------------------- 航路 */
-
-#hist-wrap { margin-top: 20px; max-width: 560px; }
-#hist-wrap > span { color: var(--dim); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
-#hist { margin-top: 7px; min-height: 30px; display: flex; flex-wrap: wrap; gap: 5px;
-  font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
-#hist i {
-  font-style: normal; border: 1px solid var(--line); border-radius: 6px;
-  padding: 2px 7px; color: var(--dim); background: rgba(130, 170, 240, 0.04);
-}
-#hist i.last { border-color: var(--ion); color: var(--ion); box-shadow: var(--glow) rgba(111, 240, 255, 0.5); }
-
 /* 右カラムの見出しは、スマホでは開閉できる見出しになる (details/summary) */
 .sec { border-bottom: 1px solid transparent; }
 .sec > summary { list-style: none; cursor: default; }
@@ -254,10 +242,6 @@ aside a { color: var(--ion); }
   .colhead { margin-left: calc(var(--label) + 8px); }
   .colhead div { font-size: 9px; }
   .rowlabel { font-size: 13px; }
-
-  /* 手順はスマホでは畳んで、盤面とボタンの間を空けない */
-  #hist-wrap { margin-top: 14px; }
-  #hist { max-height: 56px; overflow-y: auto; }
 
   /* よく使う操作は下端に固定して、片手で押せるようにする */
   .controls {

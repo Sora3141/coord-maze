@@ -153,8 +153,10 @@ export const sound = {
         tone({ freq: hz, dur: 0.26, type: 'triangle', gain: 0.30, send: 0.55 });
         tone({ freq: hz * 2, dur: 0.14, type: 'sine', gain: 0.10, send: 0.4, at: lastAt });
       } else {
-        // 戻る手はくぐもらせて、進む手と区別できるようにする
-        tone({ freq: hz / 2, dur: 0.24, type: 'sine', gain: 0.22, send: 0.5 });
+        // 戻る手。音程は進む手と同じ高さのまま、下がる動きと丸い音色で区別する。
+        // 1 オクターブ下げるとスマホのスピーカーでは鳴っていないように聞こえる。
+        tone({ freq: hz, slideTo: hz * 0.84, dur: 0.24, type: 'sine', gain: 0.30, send: 0.5 });
+        tone({ freq: hz / 2, dur: 0.20, type: 'sine', gain: 0.12, send: 0.4, at: lastAt });
       }
     });
   },

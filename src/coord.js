@@ -1,6 +1,6 @@
 import { makeCoordPuzzle } from './mazend.js';
 import { randomSeedString } from './rng.js';
-import { CoordBoard, axisName } from './coordboard.js';
+import { CoordBoard } from './coordboard.js';
 import { confirmDialog, isDialogOpen } from './ui.js';
 import { installStarfield } from './starfield.js';
 import { sound, armSound } from './sound.js';
@@ -157,7 +157,7 @@ class CoordMaze {
     if (this.moves === 0) { this.reset(); return; }
     const ok = await confirmDialog({
       title: '最初からやり直しますか？',
-      body: `いま ${this.moves} 手まで進んでいます。スタート地点に戻り、手数と手順が消えます`
+      body: `いま ${this.moves} 手まで進んでいます。スタート地点に戻り、手数が 0 に戻ります`
           + '（迷路と、通ったことのある印はそのまま残ります）。',
       okLabel: '最初からにする',
     });
@@ -260,21 +260,6 @@ class CoordMaze {
     $('moves').textContent = `${this.moves}`;
     $('seen').textContent = `${this.visited.size} / ${this.maze.size}`;
     $('coord').textContent = `(${this.pos.join(', ')})`;
-
-    const hist = $('hist');
-    hist.innerHTML = '';
-    const shown = this.history.slice(-48);
-    if (this.history.length > shown.length) {
-      const more = document.createElement('i');
-      more.textContent = `…+${this.history.length - shown.length}`;
-      hist.appendChild(more);
-    }
-    shown.forEach((h, k) => {
-      const el = document.createElement('i');
-      el.textContent = `${axisName(h.axis)}${h.sign > 0 ? '→' : '←'}`;
-      if (k === shown.length - 1) el.className = 'last';
-      hist.appendChild(el);
-    });
   }
 }
 
