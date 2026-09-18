@@ -1,10 +1,11 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=f4647c93';
-import { randomSeedString } from './rng.js?v=f4647c93';
-import { CoordBoard } from './coordboard.js?v=f4647c93';
-import { confirmDialog, isDialogOpen } from './ui.js?v=f4647c93';
-import { installStarfield } from './starfield.js?v=f4647c93';
-import { saveGame, loadGame, clearGame } from './save.js?v=f4647c93';
-import { sound, armSound } from './sound.js?v=f4647c93';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=0db842df';
+import { randomSeedString } from './rng.js?v=0db842df';
+import { CoordBoard } from './coordboard.js?v=0db842df';
+import { confirmDialog, isDialogOpen } from './ui.js?v=0db842df';
+import { installStarfield } from './starfield.js?v=0db842df';
+import { saveGame, loadGame, clearGame } from './save.js?v=0db842df';
+import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=0db842df';
+import { sound, armSound } from './sound.js?v=0db842df';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -44,6 +45,7 @@ class CoordMaze {
     }
     $('seed').value = usable ? saved.seed : randomSeedString();
     this.newGame({ seed: $('seed').value, restore: usable ? saved : null });
+    this.#renderRecords();
     setInterval(() => this.#tick(), 250);
   }
 
@@ -330,7 +332,91 @@ class CoordMaze {
     $('win-par').textContent = `${this.par}`;
     $('win-time').textContent = fmt(this.elapsed);
     $('win-seed').textContent = this.seedText;
+
+    const r = addClear({
+      rank: this.rank, width: this.width, seed: this.seedText,
+      moves: this.moves, par: this.par, time: this.elapsed,
+    });
+    const badge = r.bestMoves ? ' ・ 自己ベスト更新！'
+      : r.bestTime ? ' ・ タイムの自己ベスト更新！' : '';
+    $('win-note').textContent =
+      `${sizeLabel(this.rank, this.width)} ── ${r.count} 回目のクリア${badge}`;
+    this.#renderRecords();
     $('win').classList.remove('hidden');
+  }
+
+  // ------------------------------------------------------------------ 記録
+
+  /** 引き出しの「記録」の中身を作り直す。 */
+  #renderRecords() {
+    const host = $('records');
+    const clears = loadRecords();
+    host.innerHTML = '';
+    if (!clears.length) {
+      host.innerHTML = '<p class="note">まだクリアした記録がありません。'
+        + '解くたびに、盤面の大きさ・シード・手数・タイムがここに残ります。</p>';
+      return;
+    }
+
+    // サイズごと: 何回クリアしたか と 自己ベスト
+    const table = document.createElement('div');
+    table.className = 'rec-table';
+    table.innerHTML = '<div class="rec-head"><span>盤面</span><span>クリア</span><span>自己ベスト</span></div>';
+    for (const s of summarize(clears)) {
+      const row = document.createElement('div');
+      row.className = 'rec-row';
+      row.innerHTML = `<span>${s.rank} × ${s.width}</span><span>${s.count} 回</span>`
+        + `<span>${s.best.moves} 手 <small>/ 最短 ${s.best.par}</small> ・ ${fmt(s.best.time)}</span>`;
+      table.appendChild(row);
+    }
+    host.appendChild(table);
+
+    // 直近のクリア。シードが残っているので、同じ問題をもう一度遊べる
+    const recent = document.createElement('div');
+    recent.className = 'rec-list';
+    recent.innerHTML = '<h3>直近のクリア</h3>';
+    for (const c of clears.slice(0, 10)) {
+      const d = new Date(c.at);
+      const item = document.createElement('div');
+      item.className = 'rec-item';
+      item.innerHTML = `<b>${c.rank} × ${c.width}</b>`
+        + `<span class="rec-seed">${c.seed}</span>`
+        + `<span class="rec-num">${c.moves} 手 <small>/ 最短 ${c.par}</small> ・ ${fmt(c.time)}</span>`
+        + `<span class="rec-date">${d.getMonth() + 1}/${d.getDate()}</span>`;
+      const again = document.createElement('button');
+      again.textContent = 'もう一度';
+      again.addEventListener('click', () => this.#replay(c));
+      item.appendChild(again);
+      recent.appendChild(item);
+    }
+    host.appendChild(recent);
+
+    const wipe = document.createElement('button');
+    wipe.className = 'wide';
+    wipe.textContent = '記録を全部消す';
+    wipe.addEventListener('click', async () => {
+      const ok = await confirmDialog({
+        title: '記録を全部消しますか？',
+        body: `クリアした ${clears.length} 件の記録が消えます（この操作は元に戻せません）。`
+            + '遊んでいる盤面はそのままです。',
+        okLabel: '全部消す',
+      });
+      if (!ok) return;
+      clearRecords();
+      this.#renderRecords();
+    });
+    host.appendChild(wipe);
+  }
+
+  /** 記録に残っている問題を、もう一度出す。 */
+  async #replay(rec) {
+    if (!await this.#confirmDiscard('この問題をもう一度遊びますか？', 'もう一度遊ぶ')) return;
+    this.rank = this.pickRank = rec.rank;
+    this.width = this.pickWidth = rec.width;
+    $('seed').value = rec.seed;
+    document.body.classList.remove('menu-open');
+    $('btn-menu').setAttribute('aria-expanded', 'false');
+    this.newGame({ seed: rec.seed });
   }
 
   #tick() {
