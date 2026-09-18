@@ -1,10 +1,10 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=abefea4d';
-import { randomSeedString } from './rng.js?v=abefea4d';
-import { CoordBoard } from './coordboard.js?v=abefea4d';
-import { confirmDialog, isDialogOpen } from './ui.js?v=abefea4d';
-import { installStarfield } from './starfield.js?v=abefea4d';
-import { saveGame, loadGame, clearGame } from './save.js?v=abefea4d';
-import { sound, armSound } from './sound.js?v=abefea4d';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=f4647c93';
+import { randomSeedString } from './rng.js?v=f4647c93';
+import { CoordBoard } from './coordboard.js?v=f4647c93';
+import { confirmDialog, isDialogOpen } from './ui.js?v=f4647c93';
+import { installStarfield } from './starfield.js?v=f4647c93';
+import { saveGame, loadGame, clearGame } from './save.js?v=f4647c93';
+import { sound, armSound } from './sound.js?v=f4647c93';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -220,6 +220,8 @@ class CoordMaze {
       width: this.width,
       onMove: (axis, sign) => this.move(axis, sign),
       onSelect: (axis) => this.select(axis),
+      // 盤面の下には操作ボタンが来る。そのぶんを空けて、画面に収まる大きさにする。
+      spaceBelow: () => document.querySelector('.controls').getBoundingClientRect().height + 22,
     });
   }
 

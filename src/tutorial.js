@@ -1,9 +1,9 @@
-import { makeCoordPuzzle } from './puzzle.js?v=abefea4d';
-import { randomSeedString } from './rng.js?v=abefea4d';
-import { CoordBoard, axisColor, axisName } from './coordboard.js?v=abefea4d';
-import { confirmDialog, isDialogOpen } from './ui.js?v=abefea4d';
-import { installStarfield } from './starfield.js?v=abefea4d';
-import { sound, armSound } from './sound.js?v=abefea4d';
+import { makeCoordPuzzle } from './puzzle.js?v=f4647c93';
+import { randomSeedString } from './rng.js?v=f4647c93';
+import { CoordBoard, axisColor, axisName } from './coordboard.js?v=f4647c93';
+import { confirmDialog, isDialogOpen } from './ui.js?v=f4647c93';
+import { installStarfield } from './starfield.js?v=f4647c93';
+import { sound, armSound } from './sound.js?v=f4647c93';
 
 const $ = (id) => document.getElementById(id);
 const RANK = 2;     // チュートリアルは 2 次元固定 (迷路の絵が描ける最大が 3 次元、
@@ -81,8 +81,6 @@ class Tutorial {
       onSelect: (axis) => this.select(axis),
     });
     this.#initEvents();
-    $('btn-sound').classList.toggle('on', sound.enabled);
-    $('btn-sound').innerHTML = `効果音 ${sound.enabled ? 'ON' : 'OFF'} <kbd>V</kbd>`;
     this.newPuzzle('GUIDE');
   }
 
@@ -91,7 +89,6 @@ class Tutorial {
     $('btn-reset').addEventListener('click', () => this.requestReset());
     $('btn-hint').addEventListener('click', () => this.hint());
     $('btn-new').addEventListener('click', () => this.newPuzzle(randomSeedString()));
-    $('btn-sound').addEventListener('click', () => this.toggleSound());
     $('btn-close').addEventListener('click', () => $('done').classList.add('hidden'));
 
     this.canvas.addEventListener('click', (e) => {
@@ -122,7 +119,6 @@ class Tutorial {
         case 'KeyR': this.requestReset(); break;
         case 'KeyH': this.hint(); break;
         case 'KeyN': this.newPuzzle(randomSeedString()); break;
-        case 'KeyV': this.toggleSound(); break;
         default: return;
       }
       e.preventDefault();
@@ -243,12 +239,6 @@ class Tutorial {
     $('selected').textContent = axisName(this.selected);
     $('selected').style.color = axisColor(this.selected, RANK);
     this.#renderSteps();
-  }
-
-  toggleSound() {
-    const on = sound.toggle();
-    $('btn-sound').classList.toggle('on', on);
-    $('btn-sound').innerHTML = `効果音 ${on ? 'ON' : 'OFF'} <kbd>V</kbd>`;
   }
 
   #renderSteps() {

@@ -1,6 +1,10 @@
 // 0 と紛れる 'o' は避ける。12 次元まで 1 文字で足りる。
 export const LETTERS = ['x', 'y', 'z', 'w', 'v', 'u', 't', 's', 'r', 'q', 'p', 'n'];
 
+// マスの下限。これより小さくすると押しづらいが、
+// 盤面全体が一度に見えるほうを優先する (足りなければ左右になぞって動かせる)。
+const MIN_CELL = 20;
+
 export const axisName = (a) => LETTERS[a] || `d${a}`;
 export const axisHue = (a, rank) => (200 + (a / Math.max(1, rank)) * 300) % 360;
 export const axisColor = (a, rank, alpha = 1) =>
@@ -25,6 +29,8 @@ export class CoordBoard {
     this.onMove = opts.onMove || (() => {});
     this.onSelect = opts.onSelect || (() => {});
     this.heads = opts.heads;
+    // 盤面の下に残しておきたい高さ (操作ボタンなど)。渡されたときだけ縦にも収める。
+    this.spaceBelow = opts.spaceBelow || null;
     this.pos = Array(this.rank).fill(0);
     this.swiped = false;
     this.#build();
@@ -38,13 +44,16 @@ export class CoordBoard {
 
     const head = document.createElement('div');
     head.className = 'colhead';
+    this.headCells = [];
     for (let c = 0; c < width; c++) {
       const d = document.createElement('div');
       d.textContent = this.heads ? this.heads[c]
         : c === 0 ? 'START' : c === width - 1 ? 'GOAL' : `${c}`;
       d.className = c === 0 ? 's' : c === width - 1 ? 'g' : '';
       head.appendChild(d);
+      this.headCells.push(d);
     }
+    this.head = head;
     this.host.appendChild(head);
 
     this.rows = [];
@@ -108,16 +117,42 @@ export class CoordBoard {
       - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth)
       - (label + rowGap) * 2;
 
-    // マス数が多いときは大きくしすぎない。指で押せる下限は 30px。
+    // 縦にも収める。行が多いと画面からはみ出して、盤面を一度に見渡せなくなる。
+    // spaceBelow (盤面の下に残しておきたい高さ) を渡されたときだけ効かせる。
+    const roomByHeight = this.spaceBelow ? this.#fitHeight(cs, gap) : Infinity;
+
+    // マス数が多いときは大きくしすぎない。
     const max = width >= 11 ? 34 : width >= 9 ? 42 : width >= 7 ? 50 : 58;
     const room = Math.floor((inner - gap * (width - 1)) / width);
-    const cell = Math.max(30, Math.min(max, room));
+    const cell = Math.max(MIN_CELL, Math.min(max, room, roomByHeight));
     this.host.style.setProperty('--cell', `${cell}px`);
+
+    // マスが小さいときは、列見出しを詰める (START が隣の列にはみ出すため)
+    const tight = cell < 38;
+    if (!this.heads) {
+      for (let c = 0; c < width; c++) {
+        this.headCells[c].textContent = c === 0 ? (tight ? 'S' : 'START')
+          : c === width - 1 ? (tight ? 'G' : 'GOAL') : `${c}`;
+      }
+    }
 
     // 収まりきらず横スクロールになる場合は、スワイプを指のスクロールに譲る。
     const overflow = cell * width + gap * (width - 1) > inner + 1;
     this.host.classList.toggle('scrolls', overflow);
     this.swipeEnabled = !overflow;
+  }
+
+  /** 縦に入るマスの大きさ。画面の下端までの残りから割り出す。 */
+  #fitHeight(cs, gap) {
+    const below = typeof this.spaceBelow === 'function' ? this.spaceBelow() : this.spaceBelow;
+    // ページを一番上まで戻したときの、盤面の上端の位置で測る
+    // (今のスクロール位置で測ると、スクロールするたびに大きさが変わってしまう)
+    const top = this.host.getBoundingClientRect().top + window.scrollY;
+    const headH = this.head ? this.head.getBoundingClientRect().height + 6 : 0;
+    const avail = window.innerHeight - top - below - headH
+      - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+      - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
+    return Math.floor((avail - gap * (this.rank - 1)) / this.rank);
   }
 
   /** 作り直すときに呼ぶ。監視を残さない。 */
@@ -131,10 +166,10 @@ export class CoordBoard {
     if (box && typeof ResizeObserver !== 'undefined') {
       this.ro = new ResizeObserver(() => this.fit());
       this.ro.observe(box);
-    } else {
-      this.onResize = () => this.fit();
-      window.addEventListener('resize', this.onResize);
     }
+    // 高さだけが変わるとき (画面の回転、URL バーの出入り) は ResizeObserver では拾えない
+    this.onResize = () => this.fit();
+    window.addEventListener('resize', this.onResize);
   }
 
   // -------------------------------------------------------------- スワイプ
