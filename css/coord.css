@@ -10,7 +10,7 @@
 
 /* -------------------------------------------------------------- ヘッダー */
 
-header { padding: 34px var(--edge) 10px; position: relative; }
+header { padding: calc(34px + var(--sat)) var(--edge) 10px; position: relative; }
 h1 { margin: 0; font-size: 34px; text-shadow: 0 0 30px rgba(111, 240, 255, 0.28); }
 h1 span { color: var(--ion); }
 .tagline { margin: 7px 0 0; color: var(--dim); letter-spacing: 0.02em; }
@@ -303,8 +303,8 @@ button.sound { margin-bottom: 16px; }
     width: min(400px, 92vw);
     border-radius: 0; border-right: 0; border-top: 0; border-bottom: 0;
     overflow-y: auto; overscroll-behavior: contain;
-    padding: max(18px, env(safe-area-inset-top)) 18px
-             max(18px, calc(12px + env(safe-area-inset-bottom)));
+    padding: calc(18px + var(--sat)) max(18px, var(--sar))
+             calc(18px + var(--sab)) 18px;
     transform: translateX(101%);
     transition: transform 0.22s cubic-bezier(0.3, 0.9, 0.35, 1);
     box-shadow: -24px 0 60px -30px #000;
@@ -328,7 +328,7 @@ button.sound { margin-bottom: 16px; }
   :root { --edge: 14px; --gap: 5px; --label: 26px; }
 
   /* ヘッダーは 1 画面ぶんの高さを食わない程度に詰める */
-  header { padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: 4px; }
+  header { padding-top: calc(16px + var(--sat)); padding-bottom: 4px; }
   h1 { font-size: 24px; }
   .tagline { font-size: 12px; margin-top: 4px; }
   .menu-btn { padding: 9px 12px; }
@@ -349,7 +349,7 @@ button.sound { margin-bottom: 16px; }
   .controls {
     position: sticky; bottom: 0; z-index: 6;
     margin: 16px calc(var(--edge) * -1) 0;
-    padding: 9px var(--edge) max(9px, calc(6px + env(safe-area-inset-bottom)));
+    padding: 9px var(--edge) max(9px, calc(6px + var(--sab)));
     display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
     background: rgba(4, 6, 15, 0.86);
     backdrop-filter: blur(12px);
@@ -365,7 +365,10 @@ button.sound { margin-bottom: 16px; }
   /* キーボードのない端末では、ボタンのキー表示は意味がないので消す */
   kbd { display: none; }
 
-  aside { padding: 16px 16px 20px; }
+  /* 上の @media (max-width:1000px) で入れた端末の余白を打ち消さないよう、
+     ここでも同じように余白を足しておく */
+  aside { padding: calc(16px + var(--sat)) max(16px, var(--sar))
+                   calc(20px + var(--sab)) 16px; }
   aside h2 { margin: 16px 0 9px; }
   aside p { line-height: 1.85; }
 
