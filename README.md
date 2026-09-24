@@ -13,6 +13,8 @@ N 次元の格子迷路を、**空間を一切描かずに座標だけで表し�
 
 **▶ ブラウザで遊ぶ: https://sora3141.github.io/coord-maze/**
 
+制作: [T.OFO](https://sora3141.github.io/)
+
 ## 遊び方
 
 ```sh

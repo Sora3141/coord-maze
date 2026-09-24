@@ -35,7 +35,8 @@
 
 * { box-sizing: border-box; }
 
-html { height: 100%; }
+/* Safari 26 の上下バーの色は html から取られるので、body と同じ色を html にも付ける */
+html { height: 100%; background: var(--void); }
 
 body {
   margin: 0;
