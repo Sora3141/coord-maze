@@ -254,10 +254,12 @@ src/save.js         進みぐあいの保存と読み出し
 src/records.js      クリアの記録 (サイズ・シード・手数・タイム)
 src/ui.js           確認ダイアログ
 src/share.js        このゲームをシェアする (共有メニュー / リンクのコピー)
+src/offline.js      サービスワーカーの登録
+sw.js               圏外でも遊べるように保存する (VERSION と SHELL は stamp.mjs が書く)
 src/rng.js          シード付き乱数
 src/starfield.js    背景の星空
 src/sound.js        効果音の合成
-tools/stamp.mjs     読み込み URL に中身のハッシュを付ける (キャッシュ対策)
+tools/stamp.mjs     読み込み URL に中身のハッシュを付ける (キャッシュ対策。sw.js の版と一覧も)
 ```
 
 これからやりたいことは [TODO.md](TODO.md) に置いてあります。

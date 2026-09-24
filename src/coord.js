@@ -1,14 +1,15 @@
 import {
   makeCoordPuzzle, statesOf, RANKS, WIDTHS, MAX_STATES, MORE_RANKS, MORE_WIDTHS, MORE_MAX_STATES,
-} from './puzzle.js?v=9865276f';
-import { randomSeedString } from './rng.js?v=9865276f';
-import { CoordBoard } from './coordboard.js?v=9865276f';
-import { confirmDialog, isDialogOpen } from './ui.js?v=9865276f';
-import { installStarfield } from './starfield.js?v=9865276f';
-import { installShare } from './share.js?v=9865276f';
-import { saveGame, loadGame, clearGame } from './save.js?v=9865276f';
-import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=9865276f';
-import { sound, armSound } from './sound.js?v=9865276f';
+} from './puzzle.js?v=c71873b6';
+import { randomSeedString } from './rng.js?v=c71873b6';
+import { CoordBoard } from './coordboard.js?v=c71873b6';
+import { confirmDialog, isDialogOpen } from './ui.js?v=c71873b6';
+import { installStarfield } from './starfield.js?v=c71873b6';
+import { installShare } from './share.js?v=c71873b6';
+import { installOffline } from './offline.js?v=c71873b6';
+import { saveGame, loadGame, clearGame } from './save.js?v=c71873b6';
+import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=c71873b6';
+import { sound, armSound } from './sound.js?v=c71873b6';
 
 // 「もっと大きく」を押すと、MORE_RANKS / MORE_WIDTHS のボタンも出る
 const ALL_RANKS = [...RANKS, ...MORE_RANKS];
@@ -514,6 +515,7 @@ function foldSections() {
 installStarfield();
 armSound();
 installShare();
+installOffline();
 installMenu();
 foldSections();
 window.coordMaze = new CoordMaze();

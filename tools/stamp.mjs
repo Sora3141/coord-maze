@@ -12,6 +12,7 @@
 //   HTML の <script src> と <link href>
 //   JS の import ... from './x.js'
 //   アイコンとマニフェスト (HTML の <link rel="icon" など と、manifest.webmanifest の中)
+// あわせて sw.js の VERSION と SHELL (圏外用に先に保存するファイルの一覧) も書く。
 //
 // アイコンの版は JS / CSS とは別に、アイコンとマニフェストの中身だけから取る。
 // CSS を直しただけでアイコンまで取り直させないため。
@@ -32,6 +33,8 @@ const ls = (dir, ext) => readdirSync(join(root, dir))
 
 const read = (f) => readFileSync(join(root, f), 'utf8');
 const MANIFEST = 'manifest.webmanifest';
+const SW = 'sw.js';
+const SW_BLOCK = /(\/\/ --- ここから下の 2 つは[^\n]*\n)[\s\S]*?(\/\/ --- ここまで ---)/;
 const strip = (text) => text.replace(/\?v=[0-9a-f]{8}/g, '');
 
 /**
@@ -69,12 +72,28 @@ export function stampAll({ write = false } = {}) {
     outdated.push(f);
     if (write) writeFileSync(join(root, f), after);
   }
-  return { version: v, iconVersion: iv, outdated };
+  // sw.js: 版が変わったら新しいキャッシュに入れ直す。HTML の中身も版に含める
+  // (HTML だけ直したときも、圏外用の保存版を入れ替えるため)。
+  // SHELL は版なしの URL。圏外のときは sw.js が ?v= を無視して探す。
+  const shell = ['./', ...pages, ...code, MANIFEST, ...icons].map((f) => (f === './' ? f : `./${f}`));
+  const swhash = createHash('sha1').update(`${v}\n${iv}\n`);
+  for (const f of pages) swhash.update(`${f}\n${strip(read(f))}`);
+  const swv = swhash.digest('hex').slice(0, 8);
+  const swBefore = read(SW);
+  if (!SW_BLOCK.test(swBefore)) throw new Error(`${SW} に stamp.mjs が書く場所の印がありません`);
+  const swAfter = swBefore.replace(SW_BLOCK, (_, head, tail) =>
+    `${head}const VERSION = '${swv}';\nconst SHELL = [\n${shell.map((u) => `  '${u}',`).join('\n')}\n];\n${tail}`);
+  if (swAfter !== swBefore) {
+    outdated.push(SW);
+    if (write) writeFileSync(join(root, SW), swAfter);
+  }
+
+  return { version: v, iconVersion: iv, swVersion: swv, outdated };
 }
 
 // 直接実行されたときだけ書き込む (テストから読み込んでも動かない)
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const { version, iconVersion, outdated } = stampAll({ write: true });
-  console.log(`版 ?v=${version} (アイコン ?v=${iconVersion})`);
+  const { version, iconVersion, swVersion, outdated } = stampAll({ write: true });
+  console.log(`版 ?v=${version} (アイコン ?v=${iconVersion}, sw.js ${swVersion})`);
   console.log(outdated.length ? `書き換え: ${outdated.join(', ')}` : '変更なし (すでに最新の版)');
 }
