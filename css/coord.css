@@ -353,6 +353,19 @@ button.share { display: inline-flex; align-items: center; justify-content: cente
   fill: currentColor; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round;
 }
 
+/* アプリにする (webapp-kit)。枠の中に + の角丸四角。塗らずに線だけで描く */
+.install-ico { fill: none; stroke-linejoin: round; }
+/* iPhone / Mac Safari で出る「ホーム画面に追加」の案内を宇宙テーマの色にそろえる */
+:root {
+  --wak-bg: #0a1022;
+  --wak-fg: var(--ink);
+  --wak-muted: var(--dim);
+  --wak-line: var(--line);
+  --wak-accent: var(--ion);
+  --wak-accent-fg: #03121a;
+  --wak-radius: var(--radius);
+}
+
 /* 画面の下に一瞬だけ出る知らせ (「リンクをコピーしました」) */
 .toast {
   position: fixed; left: 50%; bottom: calc(96px + var(--sab)); z-index: 60;
@@ -513,6 +526,8 @@ button.sound { margin-bottom: 16px; }
   .backs { display: none; }
   .side-head { display: flex; }
   button.side-share { display: flex; margin: 10px 0 14px; }
+  /* アプリにする と シェア が並ぶときは、間を詰めて 1 組に見せる */
+  button.side-share:not([hidden]) + button.side-share { margin-top: -6px; }
 
   /* タイトルとメニューを 1 行に並べる (絶対配置だと狭い画面で重なる) */
   header { display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; }

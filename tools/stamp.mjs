@@ -9,7 +9,7 @@
 // 何度実行しても差分は出ない。
 //
 // 直すのは 3 か所:
-//   HTML の <script src> と <link href>
+//   HTML の <script src> と <link href> (src/ css/ webapp-kit/)
 //   JS の import ... from './x.js'
 //   アイコンとマニフェスト (HTML の <link rel="icon" など と、manifest.webmanifest の中)
 // あわせて sw.js の VERSION と SHELL (圏外用に先に保存するファイルの一覧) も書く。
@@ -42,7 +42,11 @@ const strip = (text) => text.replace(/\?v=[0-9a-f]{8}/g, '');
  * @param write true なら書き込む。false なら「ずれているファイル」を返すだけ。
  */
 export function stampAll({ write = false } = {}) {
-  const code = [...ls('src', '.js'), ...ls('css', '.css')];
+  const own = [...ls('src', '.js'), ...ls('css', '.css')];
+  // webapp-kit/ は正本 (sora3141.github.io) からのコピー。版の計算と SHELL には入れるが、
+  // 中身は書き換えない (コメント中の使い方の例まで書き換えてしまうため)
+  const kit = [...ls('webapp-kit', '.js'), ...ls('webapp-kit', '.css')];
+  const code = [...own, ...kit];
   const pages = readdirSync(root).filter((f) => f.endsWith('.html')).sort();
 
   // ハッシュは ?v= を外した中身から取る。そうしないと書き込んだ結果でハッシュが
@@ -51,23 +55,25 @@ export function stampAll({ write = false } = {}) {
   for (const f of code) hash.update(`${f}\n${strip(read(f))}`);
   const v = hash.digest('hex').slice(0, 8);
 
-  // アイコン (PNG は中身をそのまま) とマニフェスト
-  const icons = readdirSync(root).filter((f) => /^icon(-\d+)?\.(svg|png)$/.test(f)).sort();
+  // アイコン (PNG は中身をそのまま) とマニフェスト。og.png は共有カード用で、
+  // ページからは読まない (圏外用に保存する必要もない) ので外す
+  const icons = ls('icons', '.svg').concat(ls('icons', '.png'))
+    .filter((f) => f !== 'icons/og.png').sort();
   const ihash = createHash('sha1');
   for (const f of icons) ihash.update(f).update(readFileSync(join(root, f)));
   ihash.update(strip(read(MANIFEST)));
   const iv = ihash.digest('hex').slice(0, 8);
 
   const outdated = [];
-  for (const f of [...pages, ...code, MANIFEST]) {
+  for (const f of [...pages, ...own, MANIFEST]) {
     const before = read(f);
     const after = strip(before)
-      // HTML: <script src="./src/coord.js"> と <link href="css/coord.css">
-      .replace(/((?:src|href)=")((?:\.\/)?(?:src|css)\/[\w.-]+\.(?:js|css))(")/g, `$1$2?v=${v}$3`)
+      // HTML: <script src="./src/coord.js"> と <link href="css/coord.css"> と webapp-kit/
+      .replace(/((?:src|href)=")((?:\.\/)?(?:src|css|webapp-kit)\/[\w.-]+\.(?:js|css))(")/g, `$1$2?v=${v}$3`)
       // JS: import ... from './puzzle.js'
       .replace(/(from '\.\/[\w.-]+\.js)(')/g, `$1?v=${v}$2`)
-      // HTML: <link rel="icon" href="icon.svg"> など / manifest: "src": "icon-192.png"
-      .replace(/((?:href=|"src": ?)")(icon(?:-\d+)?\.(?:svg|png)|manifest\.webmanifest)(")/g, `$1$2?v=${iv}$3`);
+      // HTML: <link rel="icon" href="icons/icon.svg"> など / manifest: "src": "icons/icon-192.png"
+      .replace(/((?:href=|"src": ?)")((?:\.\/)?(?:icons\/[\w.-]+\.(?:svg|png)|manifest\.webmanifest))(")/g, `$1$2?v=${iv}$3`);
     if (after === before) continue;
     outdated.push(f);
     if (write) writeFileSync(join(root, f), after);

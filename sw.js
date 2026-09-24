@@ -13,7 +13,7 @@
 const PREFIX = 'coord-maze-';
 
 // --- ここから下の 2 つは node tools/stamp.mjs が書く (手で直さない) ---
-const VERSION = '2e85cb2d';
+const VERSION = 'ed1f1be0';
 const SHELL = [
   './',
   './index.html',
@@ -35,11 +35,15 @@ const SHELL = [
   './css/coord.css',
   './css/space.css',
   './css/tutorial.css',
+  './webapp-kit/webapp-kit.js',
+  './webapp-kit/webapp-kit.css',
   './manifest.webmanifest',
-  './icon-180.png',
-  './icon-192.png',
-  './icon-512.png',
-  './icon.svg',
+  './icons/apple-touch-icon.png',
+  './icons/favicon-32.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon.svg',
+  './icons/maskable-512.png',
 ];
 // --- ここまで ---
 

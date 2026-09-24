@@ -8,12 +8,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="COORD MAZE" />
 <title>COORD MAZE チュートリアル</title>
-<link rel="icon" href="icon.svg?v=d7cff863" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="icon-180.png?v=d7cff863" />
-<link rel="manifest" href="manifest.webmanifest?v=d7cff863" />
-<link rel="stylesheet" href="css/space.css?v=c71873b6" />
-<link rel="stylesheet" href="css/coord.css?v=c71873b6" />
-<link rel="stylesheet" href="css/tutorial.css?v=c71873b6" />
+<meta name="description" content="COORD MAZE の読み方を、2 次元の迷路と見比べながら覚えるチュートリアル。" />
+<!-- リンクを貼ったときのカード (SNS・メッセージアプリ) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="COORD MAZE" />
+<meta property="og:title" content="COORD MAZE チュートリアル" />
+<meta property="og:description" content="COORD MAZE の読み方を、2 次元の迷路と見比べながら覚えるチュートリアル。" />
+<meta property="og:url" content="https://sora3141.github.io/coord-maze/tutorial.html" />
+<meta property="og:image" content="https://sora3141.github.io/coord-maze/icons/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="./icons/icon.svg?v=2d28f3a6" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png?v=2d28f3a6" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png?v=2d28f3a6" />
+<link rel="manifest" href="./manifest.webmanifest?v=2d28f3a6" />
+<link rel="stylesheet" href="./webapp-kit/webapp-kit.css?v=5d93e095" />
+<link rel="stylesheet" href="css/space.css?v=5d93e095" />
+<link rel="stylesheet" href="css/coord.css?v=5d93e095" />
+<link rel="stylesheet" href="css/tutorial.css?v=5d93e095" />
+<script src="./webapp-kit/webapp-kit.js?v=5d93e095"></script>
 </head>
 <body>
 
@@ -21,6 +36,7 @@
   <h1>座標迷路の <span>読み方</span></h1>
   <p class="tagline">2 次元で、迷路そのものと見比べながら覚える</p>
   <div class="backs">
+    <button class="back share" data-wak="install" hidden><svg class="share-ico install-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>アプリにする</button>
     <button class="back share" data-share><svg class="share-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>シェア</button>
     <a class="back" href="index.html">COORD MAZE へ →</a>
   </div>
@@ -95,6 +111,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/tutorial.js?v=c71873b6"></script>
+<script type="module" src="./src/tutorial.js?v=5d93e095"></script>
 </body>
 </html>

@@ -11,16 +11,23 @@
 <meta name="description" content="N 次元迷路を、座標だけで表したパズル。10 次元まで、同じ画面で遊べます。" />
 <!-- リンクを貼ったときのカード (SNS・メッセージアプリ) -->
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://sora3141.github.io/coord-maze/" />
+<meta property="og:site_name" content="COORD MAZE" />
 <meta property="og:title" content="COORD MAZE — 座標迷路" />
 <meta property="og:description" content="N 次元迷路を、座標だけで表したパズル。10 次元まで、同じ画面で遊べます。" />
-<meta property="og:image" content="https://sora3141.github.io/coord-maze/icon-512.png" />
-<meta name="twitter:card" content="summary" />
-<link rel="icon" href="icon.svg?v=d7cff863" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="icon-180.png?v=d7cff863" />
-<link rel="manifest" href="manifest.webmanifest?v=d7cff863" />
-<link rel="stylesheet" href="css/space.css?v=c71873b6" />
-<link rel="stylesheet" href="css/coord.css?v=c71873b6" />
+<meta property="og:url" content="https://sora3141.github.io/coord-maze/" />
+<meta property="og:image" content="https://sora3141.github.io/coord-maze/icons/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="./icons/icon.svg?v=2d28f3a6" type="image/svg+xml" />
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png?v=2d28f3a6" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png?v=2d28f3a6" />
+<link rel="manifest" href="./manifest.webmanifest?v=2d28f3a6" />
+<link rel="stylesheet" href="./webapp-kit/webapp-kit.css?v=5d93e095" />
+<link rel="stylesheet" href="css/space.css?v=5d93e095" />
+<link rel="stylesheet" href="css/coord.css?v=5d93e095" />
+<script src="./webapp-kit/webapp-kit.js?v=5d93e095"></script>
 </head>
 <body>
 
@@ -43,6 +50,8 @@
   </svg>COORD <span>MAZE</span></h1>
   <p class="tagline">N 次元迷路を、座標だけで表したパズル</p>
   <div class="backs">
+    <!-- アプリにする (webapp-kit)。インストール済み・インストールできない環境では隠れる -->
+    <button class="back share" data-wak="install" hidden><svg class="share-ico install-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>アプリにする</button>
     <button class="back share" data-share><svg class="share-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>シェア</button>
     <a class="back" href="tutorial.html">はじめての方へ（チュートリアル）</a>
   </div>
@@ -77,6 +86,7 @@
       <button id="btn-menu-close" class="close" aria-label="閉じる">✕</button>
     </div>
     <!-- 狭い画面ではヘッダーのシェアが隠れるので、引き出しの先頭に置く -->
+    <button class="wide share side-share" data-wak="install" hidden><svg class="share-ico install-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>このゲームをアプリにする</button>
     <button class="wide share side-share" data-share><svg class="share-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>このゲームをシェア</button>
 
     <details class="sec" open>
@@ -169,6 +179,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/coord.js?v=c71873b6"></script>
+<script type="module" src="./src/coord.js?v=5d93e095"></script>
 </body>
 </html>

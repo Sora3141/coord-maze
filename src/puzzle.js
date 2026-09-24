@@ -1,6 +1,6 @@
-import { MazeND } from './mazend.js?v=c71873b6';
-import { hashSeed } from './rng.js?v=c71873b6';
-import { HierMaze } from './hmaze.js?v=c71873b6';
+import { MazeND } from './mazend.js?v=5d93e095';
+import { hashSeed } from './rng.js?v=5d93e095';
+import { HierMaze } from './hmaze.js?v=5d93e095';
 
 /**
  * 座標迷路 (COORD MAZE) の出題を作る。
