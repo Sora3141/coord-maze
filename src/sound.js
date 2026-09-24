@@ -20,12 +20,19 @@ let wet = null;
 let offline = false;   // OfflineAudioContext で鳴らしているか (テスト用)
 let lastAt = 0;
 let enabled = readPref();
+setAudioSession(enabled);
 
 function readPref() {
   try { return localStorage.getItem(STORAGE_KEY) !== '0'; } catch { return true; }
 }
 function writePref(v) {
   try { localStorage.setItem(STORAGE_KEY, v ? '1' : '0'); } catch { /* 保存できなくても鳴らせる */ }
+}
+
+// iPhone のマナーモードでも鳴らす（Safari 16.4 以降）。
+// 'playback' にすると音楽アプリの曲が止まるので、効果音がオンのときだけにする。
+function setAudioSession(soundOn) {
+  try { if (navigator.audioSession) navigator.audioSession.type = soundOn ? 'playback' : 'auto'; } catch { /* 対応していない */ }
 }
 
 /** 減衰するノイズから残響用のインパルス応答を作る。 */
@@ -144,6 +151,7 @@ export const sound = {
   /** 最初の操作で呼ぶ。自動再生制限の解除。 */
   unlock() {
     if (!enabled) return;
+    setAudioSession(true);
     if (!ensure()) return;
     // 一部の状態では resume() が例外を投げる。鳴らせなくても進行は止めない。
     try { if (!offline && ctx.state === 'suspended') ctx.resume(); } catch { /* noop */ }
@@ -152,6 +160,7 @@ export const sound = {
   toggle() {
     enabled = !enabled;
     writePref(enabled);
+    setAudioSession(enabled);
     if (enabled) { this.unlock(); this.ui(); }
     return enabled;
   },

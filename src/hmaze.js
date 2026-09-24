@@ -1,4 +1,4 @@
-import { mulberry32, hashSeed } from './rng.js?v=5d93e095';
+import { mulberry32, hashSeed } from './rng.js?v=7348bbc2';
 
 /**
  * 階層的な暗黙の迷路 (大きい盤面用)。
