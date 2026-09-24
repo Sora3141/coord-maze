@@ -1,12 +1,12 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=d3edcc60';
-import { randomSeedString } from './rng.js?v=d3edcc60';
-import { CoordBoard } from './coordboard.js?v=d3edcc60';
-import { confirmDialog, isDialogOpen } from './ui.js?v=d3edcc60';
-import { installStarfield } from './starfield.js?v=d3edcc60';
-import { installShare } from './share.js?v=d3edcc60';
-import { saveGame, loadGame, clearGame } from './save.js?v=d3edcc60';
-import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=d3edcc60';
-import { sound, armSound } from './sound.js?v=d3edcc60';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=8c8e47f0';
+import { randomSeedString } from './rng.js?v=8c8e47f0';
+import { CoordBoard } from './coordboard.js?v=8c8e47f0';
+import { confirmDialog, isDialogOpen } from './ui.js?v=8c8e47f0';
+import { installStarfield } from './starfield.js?v=8c8e47f0';
+import { installShare } from './share.js?v=8c8e47f0';
+import { saveGame, loadGame, clearGame } from './save.js?v=8c8e47f0';
+import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=8c8e47f0';
+import { sound, armSound } from './sound.js?v=8c8e47f0';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];

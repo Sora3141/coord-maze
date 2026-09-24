@@ -20,8 +20,8 @@
 <link rel="icon" href="icon.svg?v=28e315ca" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon-180.png?v=28e315ca" />
 <link rel="manifest" href="manifest.webmanifest?v=28e315ca" />
-<link rel="stylesheet" href="css/space.css?v=d3edcc60" />
-<link rel="stylesheet" href="css/coord.css?v=d3edcc60" />
+<link rel="stylesheet" href="css/space.css?v=8c8e47f0" />
+<link rel="stylesheet" href="css/coord.css?v=8c8e47f0" />
 </head>
 <body>
 
@@ -139,9 +139,9 @@
     </p>
     <p class="note">
       迷路は<b>すべての状態がつながった</b>ふつうの迷路です。行けない場所はありません。
-      いちばん大きい <b>7 次元 7 マス</b>は 82 万通りの状態があり、最短でも 350 手を超えます。
-      状態数は「マス数 ^ 次元数」で増えるので、120 万通りを超える組み合わせは選べません
-      （迷路である以上、正しい道を見つけるには状態の数だけ探し回ることになるためです）。
+      いちばん大きい <b>10 次元 10 マス</b>は 100 億通りの状態があります。
+      大きい盤面は壁を全部は作らず、区画に分けて、いま近くにある部分だけをその場で作っています。
+      状態数は「マス数 ^ 次元数」で増えるので、大きい盤面は腰を据えて遊ぶためのものです。
     </p>
     </details>
   </aside>
@@ -166,6 +166,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/coord.js?v=d3edcc60"></script>
+<script type="module" src="./src/coord.js?v=8c8e47f0"></script>
 </body>
 </html>

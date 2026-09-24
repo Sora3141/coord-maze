@@ -1,6 +1,7 @@
 // 座標迷路 (COORD MAZE) の検証:  node test/coord.test.mjs
 
-import { makeCoordPuzzle, statesOf, MAX_STATES } from '../src/puzzle.js';
+import { makeCoordPuzzle, statesOf, MAX_STATES, EXPLICIT_MAX } from '../src/puzzle.js';
+import { HierMaze } from '../src/hmaze.js';
 
 let fails = 0;
 const check = (cond, msg) => { if (!cond) { console.log('  FAIL:', msg); fails++; } };
@@ -126,8 +127,92 @@ for (const [rank, width] of [[5, 10], [9, 4], [7, 7], [6, 10]]) {
     + `最短 ${puzzle.par} 手 / 直線距離 ${rank * (width - 1)} 手 / 生成 ${ms.toFixed(0)}ms`);
 }
 
-check(statesOf(7, 7) <= MAX_STATES, '7次元7マスは上限に収まるはず');
-check(statesOf(7, 8) > MAX_STATES, '7次元8マスは上限を超えるはず');
+check(statesOf(7, 7) <= EXPLICIT_MAX, '7次元7マスは配列で持つ迷路 (MazeND) のはず');
+check(statesOf(7, 8) > EXPLICIT_MAX, '7次元8マスからは階層的な迷路 (HierMaze) のはず');
+check(statesOf(10, 10) <= MAX_STATES, '10次元10マスまで選べるはず');
+// (instanceof は使えない: ゲーム側は ?v= 付きの URL で読み込むので、別のモジュールになる)
+const isHier = (m) => typeof m.solutionLength === 'function';
+check(!isHier(makeCoordPuzzle({ rank: 7, width: 7, seedText: 'AAA' }).maze), '7次元7マスが MazeND でない (前と同じ迷路が出なくなる)');
+
+// ------------------------------------------------ 階層的な迷路 (大きい盤面)
+
+// 小さい盤面で、区画を細かく割って階層を深くし、全状態を総当たりで確かめる
+console.log('\n階層的な迷路 (小さい盤面・区画を細かく割って総当たり)');
+for (const [dims, leafMax] of [[[4, 4, 4], 4], [[3, 5, 2, 4], 6], [[6, 6], 4], [[2, 2, 2, 2, 2, 2], 2],
+  [[5, 5, 5], 8], [[7, 3, 4], 5], [[10, 10], 10], [[3, 3, 3, 3, 3], 9]]) {
+  for (const seed of [1, 2, 3]) {
+    for (const opts of [{ bias: 0.7, align: 0 }, { bias: 0.85, align: 1 },
+      { bias: 0.7, align: 0.7, corridor: true, fewSplits: true }]) {
+      const m = new HierMaze({ dims, seed, leafMax, ...opts });
+      const where = `階層 ${dims.join('×')} leaf${leafMax} seed${seed} ${JSON.stringify(opts)}`;
+      let edges = 0;
+      for (let i = 0; i < m.size; i++) {
+        for (let a = 0; a < m.rank; a++) {
+          if (!m.isOpen(i, a, 1)) continue;
+          edges++;
+          check(m.isOpen(i + m.strides[a], a, -1), `${where}: 片側からしか通れない壁がある`);
+        }
+      }
+      const states = reachableStates(m);
+      check(states.size === m.size, `${where}: 行けない状態がある`);
+      check(edges === m.size - 1, `${where}: 木になっていない (辺 ${edges} / 状態 ${m.size})`);
+      // ゴールからの距離と、ヒント・最短手数を突き合わせる
+      const dist = new Int32Array(m.size).fill(-1);
+      const queue = [m.goal];
+      dist[m.goal] = 0;
+      for (let h = 0; h < queue.length; h++) {
+        for (let a = 0; a < m.rank; a++) {
+          for (const sign of [1, -1]) {
+            const j = m.neighbor(queue[h], a, sign);
+            if (j >= 0 && dist[j] < 0) { dist[j] = dist[queue[h]] + 1; queue.push(j); }
+          }
+        }
+      }
+      check(m.solutionLength() === dist[m.start], `${where}: 最短手数 ${m.solutionLength()} が実際 (${dist[m.start]}) と違う`);
+      for (let i = 0; i < m.size; i += 7) {
+        if (i === m.goal) continue;
+        const [a, sign] = m.nextStep(i);
+        check(m.isOpen(i, a, sign) && dist[i + sign * m.strides[a]] === dist[i] - 1, `${where}: ヒントが最短の手でない`);
+      }
+    }
+  }
+}
+console.log('  8 種 × シード 3 × 設定 3 (本道あり・なし): 全域木・両側から同じ壁・最短手数・ヒントを確認');
+
+console.log('\n階層的な迷路 (上限まで)');
+for (const [rank, width] of [[7, 8], [8, 8], [9, 9], [10, 10]]) {
+  const t0 = performance.now();
+  const puzzle = makeCoordPuzzle({ rank, width, seedText: 'AAA' });
+  const ms = performance.now() - t0;
+  const m = puzzle.maze;
+  const where = `${rank}次元${width}マス`;
+  check(isHier(m), `${where}: 階層的な迷路になっていない`);
+  check(m.coords(m.goal).every((c) => c === width - 1), `${where}: ゴールが全次元 ${width - 1} でない`);
+  check(puzzle.par > rank * (width - 1), `${where}: 直線距離で解けてしまう`);
+  check(makeCoordPuzzle({ rank, width, seedText: 'AAA' }).par === puzzle.par, `${where}: 同じシードで問題が変わる`);
+  check(ms < 1000, `${where}: 生成に ${ms.toFixed(0)}ms かかる (遅すぎる)`);
+  // ヒントをたどると、ちょうど最短手数でゴールに着く (1 手ずつ壁も確かめる)
+  let cur = m.start, n = 0;
+  const t1 = performance.now();
+  for (; cur !== m.goal && n <= puzzle.par; n++) {
+    const [a, sign] = m.nextStep(cur);
+    check(m.isOpen(cur, a, sign) && m.isOpen(cur + sign * m.strides[a], a, -sign), `${where}: ヒントが壁を抜ける`);
+    cur += sign * m.strides[a];
+  }
+  const perStep = (performance.now() - t1) / Math.max(1, n);
+  check(cur === m.goal && n === puzzle.par, `${where}: ヒントをたどっても最短手数 (${puzzle.par}) でゴールに着かない (${n} 手)`);
+  // 道から外れたところでも、ヒントはゴールへ近づける (壁の読み出しとも食い違わない)
+  let x = m.start;
+  for (let k = 0; k < 40; k++) {
+    const opts = [];
+    for (let a = 0; a < m.rank; a++) for (const s of [1, -1]) if (m.neighbor(x, a, s) >= 0) opts.push(m.neighbor(x, a, s));
+    x = opts[(k * 7919) % opts.length];
+  }
+  const s = m.nextStep(x);
+  check(s && m.isOpen(x, s[0], s[1]), `${where}: 寄り道した先でヒントが出ない`);
+  console.log(`  ${where} (状態 ${statesOf(rank, width).toLocaleString('en-US')}): `
+    + `最短 ${puzzle.par} 手 / 直線距離 ${rank * (width - 1)} 手 / 生成 ${ms.toFixed(0)}ms / ヒント 1 手 ${perStep.toFixed(2)}ms`);
+}
 
 // ------------------------------------------------- 読み込み URL の版
 

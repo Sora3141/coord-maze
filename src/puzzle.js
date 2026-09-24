@@ -1,23 +1,34 @@
-import { MazeND } from './mazend.js?v=d3edcc60';
-import { hashSeed } from './rng.js?v=d3edcc60';
+import { MazeND } from './mazend.js?v=8c8e47f0';
+import { hashSeed } from './rng.js?v=8c8e47f0';
+import { HierMaze } from './hmaze.js?v=8c8e47f0';
 
 /**
  * 座標迷路 (COORD MAZE) の出題を作る。
  *
- * 迷路は格子グラフ全体の最小全域木 (MazeND)。**すべての状態に行ける**、
- * ふつうの迷路にしてある。
+ * どちらの迷路も**すべての状態に行ける**、輪のないふつうの迷路にしてある。
+ *   - 120 万状態まで: 格子グラフ全体の最小全域木 (MazeND)。壁を全部配列で持つ
+ *   - それより大きい盤面: 階層的な暗黙の迷路 (HierMaze)。壁を持たず、聞かれたところだけ作る
+ * 小さい盤面を MazeND のままにしているのは、同じシードで前と同じ迷路を出すため
+ * (記録の「もう一度」や、保存してある続きがそのまま遊べる)。
  */
 
 /**
- * 出題できる状態数の上限。
- *
- * 上限がある理由は 2 つ。壁を状態数ぶんの配列で持つことと、迷路である以上
- * 正しい道を見つけるには状態の数だけ探し回ることになること。
- * 7 次元 7 マス (82 万状態) で、生成 130ms・最短 442 手ほど。
- *
- * これを超える組み合わせは選べなくしている (src/coord.js)。
+ * MazeND で作る上限。壁を状態数ぶんの配列で持ち、生成もまとめて行うので、
+ * これを超えるとメモリと時間が足りなくなる (7 次元 7 マス = 82 万状態で生成 130ms)。
  */
-export const MAX_STATES = 1_200_000;
+export const EXPLICIT_MAX = 1_200_000;
+
+/** 出題できる状態数の上限。10 次元 10 マス (100 億状態) まで、すべての組み合わせを選べる。 */
+export const MAX_STATES = 10_000_000_000;
+
+/**
+ * HierMaze の作り方。道筋を先に引くだけの、素直な作り方にしてある
+ * (MazeND と同じく、盤面が大きいほど難しい)。
+ *   bias  … 道筋を引くとき、ゴールへ近づく手を選ぶ確率
+ * 遊びやすくする設定 (扉をそろえる align・本道 corridor・fewSplits) も hmaze.js にあるが、
+ * 大きい盤面が今までの盤面より易しくなってしまうので使っていない (README の「大きい盤面」参照)。
+ */
+export const HIER_OPTIONS = { bias: 0.7 };
 
 export const statesOf = (rank, width) => width ** rank;
 
@@ -36,13 +47,15 @@ export function makeCoordPuzzle({ rank, width, seedText, maxAttempts = 80 }) {
   const manhattan = rank * (width - 1);
   let fallback = null;
 
+  const big = statesOf(rank, width) > EXPLICIT_MAX;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const maze = new MazeND({
-      dims,
-      seed: hashSeed(`${seedText}/${rank}x${width}#${attempt}`),
-      braid: 0, // ループを作ると最短手数が直線距離まで落ちてパズルにならない
-    });
-    const par = maze.path(maze.start, maze.goal).length - 1;
+    const seed = hashSeed(`${seedText}/${rank}x${width}#${attempt}`);
+    // ループを作ると最短手数が直線距離まで落ちてパズルにならないので、どちらも輪なし
+    const maze = big
+      ? new HierMaze({ dims, seed, ...HIER_OPTIONS })
+      : new MazeND({ dims, seed, braid: 0 });
+    // 大きい盤面は全体を幅優先で探せないので、道筋を引いた区画から数える
+    const par = big ? maze.solutionLength() : maze.path(maze.start, maze.goal).length - 1;
     const result = { maze, par, manhattan, detour: par - manhattan, attempts: attempt + 1 };
     if (!fallback) fallback = result;
     if (par > manhattan) return result;
