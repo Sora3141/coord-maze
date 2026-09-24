@@ -13,9 +13,9 @@ N 次元の格子迷路を、**空間を一切描かずに座標だけで表し�
 
 ## 🔗 リンク
 
-- **▶ ブラウザで遊ぶ: https://sora3141.github.io/coord-maze/**
-- チュートリアル: https://sora3141.github.io/coord-maze/tutorial.html
-- 制作: [T.OF...](https://sora3141.github.io/)
+- **▶ ブラウザで遊ぶ: https://t-of.github.io/coord-maze/**
+- チュートリアル: https://t-of.github.io/coord-maze/tutorial.html
+- 制作: [T.OF...](https://t-of.github.io/)
 
 ## 遊び方
 
@@ -64,7 +64,7 @@ N 次元の格子迷路を、**空間を一切描かずに座標だけで表し�
 
 インストール済みのとき（ホーム画面から開いているとき）や、インストールできないブラウザでは
 「アプリにする」ボタンは出ません。ボタンは [webapp-kit](webapp-kit/) を使っています
-（正本は [sora3141.github.io](https://github.com/Sora3141/sora3141.github.io) の `webapp-kit/`。直すときはそちらを直してコピーし直す）。
+（正本は [t-of.github.io](https://github.com/t-of/t-of.github.io) の `webapp-kit/`。直すときはそちらを直してコピーし直す）。
 
 ## 開発
 
@@ -283,7 +283,7 @@ src/starfield.js    背景の星空
 src/sound.js        効果音の合成
 tools/stamp.mjs     読み込み URL に中身のハッシュを付ける (キャッシュ対策。sw.js の版と一覧も)
 icons/              アイコン (icon.svg / favicon-32 / apple-touch-icon / icon-192・512 / maskable-512) と共有カード og.png
-webapp-kit/         「アプリにする」ボタン (sora3141.github.io の webapp-kit のコピー。直接は直さない)
+webapp-kit/         「アプリにする」ボタン (t-of.github.io の webapp-kit のコピー。直接は直さない)
 manifest.webmanifest  ホーム画面に追加したときの名前・色・アイコン
 ```
 

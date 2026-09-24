@@ -6,7 +6,7 @@
 // 読み込み URL には ?v=<ハッシュ> が付いている (tools/stamp.mjs)。圏外のときは
 // ?v= を無視して探すので、SHELL には版なしの URL を並べておけば足りる。
 //
-// 注意: キャッシュ (CacheStorage) は sora3141.github.io のすべてのアプリで共有されている。
+// 注意: キャッシュ (CacheStorage) は t-of.github.io のすべてのアプリで共有されている。
 // 古いキャッシュを消すときは、必ず自分の PREFIX で始まるものだけを消す。
 // keys.filter(k => k !== CACHE) のように書くと、ほかのアプリのキャッシュまで消してしまう。
 

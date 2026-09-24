@@ -43,7 +43,7 @@ const strip = (text) => text.replace(/\?v=[0-9a-f]{8}/g, '');
  */
 export function stampAll({ write = false } = {}) {
   const own = [...ls('src', '.js'), ...ls('css', '.css')];
-  // webapp-kit/ は正本 (sora3141.github.io) からのコピー。版の計算と SHELL には入れるが、
+  // webapp-kit/ は正本 (t-of.github.io) からのコピー。版の計算と SHELL には入れるが、
   // 中身は書き換えない (コメント中の使い方の例まで書き換えてしまうため)
   const kit = [...ls('webapp-kit', '.js'), ...ls('webapp-kit', '.css')];
   const code = [...own, ...kit];

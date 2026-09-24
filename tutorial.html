@@ -2,6 +2,10 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8" />
+<script>/* sora3141.github.io から移ってきた記録を受け取る。ponytail: 2027-09 ごろに消す */
+(function(){var m=location.hash.match(/^#tof-move=([^&]*)&?(.*)$/);if(!m)return;
+try{var d=JSON.parse(decodeURIComponent(m[1]));for(var k in d)if(localStorage.getItem(k)===null)localStorage.setItem(k,d[k]);}catch(e){}
+history.replaceState(null,'',location.pathname+location.search+(m[2]?'#'+m[2]:''));})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#04060f" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -14,8 +18,8 @@
 <meta property="og:site_name" content="COORD MAZE" />
 <meta property="og:title" content="COORD MAZE チュートリアル" />
 <meta property="og:description" content="COORD MAZE の読み方を、2 次元の迷路と見比べながら覚えるチュートリアル。" />
-<meta property="og:url" content="https://sora3141.github.io/coord-maze/tutorial.html" />
-<meta property="og:image" content="https://sora3141.github.io/coord-maze/icons/og.png" />
+<meta property="og:url" content="https://t-of.github.io/coord-maze/tutorial.html" />
+<meta property="og:image" content="https://t-of.github.io/coord-maze/icons/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:locale" content="ja_JP" />

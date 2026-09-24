@@ -7,7 +7,7 @@
  * 相手が開けるほうの URL を渡す。
  */
 
-export const SITE_URL = 'https://sora3141.github.io/coord-maze/';
+export const SITE_URL = 'https://t-of.github.io/coord-maze/';
 
 const DATA = {
   title: 'COORD MAZE — 座標迷路',
