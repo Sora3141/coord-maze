@@ -6,6 +6,10 @@ export const LETTERS = ['x', 'y', 'z', 'w', 'v', 'u', 't', 's', 'r', 'q', 'p', '
 const MIN_CELL = 20;
 
 export const axisName = (a) => LETTERS[a] || `d${a}`;
+
+// コマは行ごとに違う惑星にする (縞のガス惑星・輪のある惑星・岩石惑星…)。
+// 色は行の色のまま、模様で「どの行か」をもう一段見分けやすくする。見た目は coord.css。
+const PLANETS = 8;
 export const axisHue = (a, rank) => (200 + (a / Math.max(1, rank)) * 300) % 360;
 export const axisColor = (a, rank, alpha = 1) =>
   `hsl(${axisHue(a, rank)}deg 78% 62% / ${alpha})`;
@@ -86,6 +90,12 @@ export class CoordBoard {
       }
       const token = document.createElement('div');
       token.className = 'token';
+      // 動いたときに一瞬だけ出す尾 (彗星のような光跡) と、惑星そのもの
+      const trail = document.createElement('b');
+      trail.className = 'trail';
+      const planet = document.createElement('i');
+      planet.className = `planet p${a % PLANETS}`;
+      token.append(trail, planet);
       track.appendChild(token);
       row.appendChild(track);
       this.host.appendChild(row);
@@ -216,6 +226,14 @@ export class CoordBoard {
     for (let a = 0; a < this.rank; a++) {
       const { row, cells, token } = this.rows[a];
       row.classList.toggle('sel', a === state.selected);
+      // 前の位置から動いた行だけ、進んだ向きに光跡を引く
+      const was = this.shown ? this.shown[a] : state.pos[a];
+      if (was !== state.pos[a]) {
+        token.style.setProperty('--dir', state.pos[a] > was ? 1 : -1);
+        token.classList.remove('fly');
+        void token.offsetWidth;
+        token.classList.add('fly');
+      }
       token.style.setProperty('--c', state.pos[a]);
       token.classList.toggle('done', state.pos[a] === goalCol);
       for (const c of cells) c.classList.remove('can', 'fresh', 'been');
@@ -224,6 +242,8 @@ export class CoordBoard {
       const cell = this.rows[cand.axis].cells[state.pos[cand.axis] + cand.sign];
       if (cell) cell.classList.add('can', cand.seen ? 'been' : 'fresh');
     }
+    // 次に描くときの「前の位置」。渡された配列はあとで書き換わるので写しを持つ
+    this.shown = [...state.pos];
   }
 
   /** 壁にぶつかったことを一瞬だけ見せる。 */

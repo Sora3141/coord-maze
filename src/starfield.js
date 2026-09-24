@@ -163,11 +163,94 @@ export function startStarfield(canvas, { shootingStars = true } = {}) {
   return { start, stop, rebuild: build };
 }
 
-/** ページ先頭に星空用の canvas を差し込んで動かす。 */
+// ------------------------------------------------------------------ 星雲
+
+/**
+ * 星雲を一度だけ描く。星と違って動かさないので、毎フレーム描き直さない。
+ *
+ * 値ノイズを何層か重ねた (fBm) 雲を、画面の 1/6 ほどの粗さで描いて CSS で引き伸ばす。
+ * 引き伸ばすときに補間されるので、ぼかさなくても柔らかい雲になる。
+ * 乱数は固定のシードなので、開くたびに同じ空になる (見慣れた空のほうが落ち着く)。
+ */
+export function paintNebula(canvas) {
+  const SCALE = 6;
+  const w = Math.max(1, Math.ceil(canvas.clientWidth / SCALE));
+  const h = Math.max(1, Math.ceil(canvas.clientHeight / SCALE));
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(w, h);
+
+  // 格子点に乱数を置き、間をなめらかにつなぐ値ノイズ
+  const N = 256;
+  let seed = 20260924;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const grid = new Float32Array(N * N).map(rnd);
+  const at = (x, y) => grid[((y & (N - 1)) * N) + (x & (N - 1))];
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const noise = (x, y) => {
+    const xi = Math.floor(x), yi = Math.floor(y);
+    const fx = smooth(x - xi), fy = smooth(y - yi);
+    const a = at(xi, yi), b = at(xi + 1, yi), c = at(xi, yi + 1), d = at(xi + 1, yi + 1);
+    return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+  };
+  const fbm = (x, y) => {
+    let v = 0, amp = 0.5, f = 1;
+    for (let o = 0; o < 5; o++) { v += amp * noise(x * f, y * f); f *= 2.03; amp *= 0.5; }
+    return v;
+  };
+
+  // 画面の大きさによらず、雲の大きさが同じに見えるよう、実寸 (CSS px) で座標を取る
+  const unit = 1 / 260;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const X = x * SCALE * unit, Y = y * SCALE * unit;
+      // 雲をゆがませてから読むと、筋や渦のある星雲らしい形になる
+      const q = fbm(X + 3.1, Y + 1.7);
+      const density = fbm(X + q * 1.6, Y + q * 1.2);
+      const hue = fbm(X * 0.6 + 9.2, Y * 0.6 + 4.4);
+      const dust = fbm(X * 1.8 + 20, Y * 1.8 + 7);
+      // 濃いところだけを残し、暗い塵の筋で削る
+      let a = Math.max(0, density - 0.46) * 2.4;
+      a *= 1 - Math.max(0, dust - 0.52) * 2.2;
+      a = Math.max(0, Math.min(1, a));
+      // 色は 紫 → 青緑 → 桃 を hue でまぜる
+      const t = Math.max(0, Math.min(1, (hue - 0.3) * 2.5));
+      const r = 96 + (40 - 96) * t + 120 * Math.max(0, t - 0.7);
+      const g = 62 + (150 - 62) * t;
+      const b = 196 + (210 - 196) * t;
+      const i = (y * w + x) * 4;
+      img.data[i] = r; img.data[i + 1] = g; img.data[i + 2] = b;
+      img.data[i + 3] = a * 150;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/** ページ先頭に 星雲・遠くの惑星・星空 を差し込んで動かす。 */
 export function installStarfield(opts) {
+  const neb = document.createElement('canvas');
+  neb.id = 'nebula';
+  neb.setAttribute('aria-hidden', 'true');
+  // 画面の隅に大きな惑星の影。夜明け前の地平線のように、縁だけが光る
+  const horizon = document.createElement('div');
+  horizon.id = 'horizon';
+  horizon.setAttribute('aria-hidden', 'true');
   const cv = document.createElement('canvas');
   cv.id = 'stars';
   cv.setAttribute('aria-hidden', 'true');
-  document.body.prepend(cv);
+  document.body.prepend(neb, horizon, cv);
+
+  paintNebula(neb);
+  // 幅が変わったときだけ描き直す (スマホの URL バーの出入りで毎回描き直さない)
+  let lastW = neb.clientWidth, timer = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (Math.abs(neb.clientWidth - lastW) < 40) return;
+      lastW = neb.clientWidth;
+      paintNebula(neb);
+    }, 200);
+  });
   return startStarfield(cv, opts);
 }

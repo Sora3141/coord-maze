@@ -1,9 +1,9 @@
-import { makeCoordPuzzle } from './puzzle.js?v=29ae2268';
-import { randomSeedString } from './rng.js?v=29ae2268';
-import { CoordBoard, axisColor, axisName } from './coordboard.js?v=29ae2268';
-import { confirmDialog, isDialogOpen } from './ui.js?v=29ae2268';
-import { installStarfield } from './starfield.js?v=29ae2268';
-import { sound, armSound } from './sound.js?v=29ae2268';
+import { makeCoordPuzzle } from './puzzle.js?v=348fa90d';
+import { randomSeedString } from './rng.js?v=348fa90d';
+import { CoordBoard, axisColor, axisName } from './coordboard.js?v=348fa90d';
+import { confirmDialog, isDialogOpen } from './ui.js?v=348fa90d';
+import { installStarfield } from './starfield.js?v=348fa90d';
+import { sound, armSound } from './sound.js?v=348fa90d';
 
 const $ = (id) => document.getElementById(id);
 const RANK = 2;     // チュートリアルは 2 次元固定 (迷路の絵が描ける最大が 3 次元、
@@ -309,12 +309,34 @@ class Tutorial {
     halo.addColorStop(1, 'rgba(255,217,138,0)');
     g.fillStyle = halo;
     g.fillRect(sx(WIDTH - 1) - CS * 0.3, sy(WIDTH - 1) - CS * 0.3, CS * 1.6, CS * 1.6);
+    // 恒星の本体: 白い芯と金色の光球、短い光条 (左の表のゴール列と同じ絵)
+    const core = g.createRadialGradient(gx, gy, 0, gx, gy, CS * 0.34);
+    core.addColorStop(0, '#fffbea');
+    core.addColorStop(0.35, '#ffe3a0');
+    core.addColorStop(0.7, 'rgba(255,186,84,0.7)');
+    core.addColorStop(1, 'rgba(255,140,50,0)');
+    g.fillStyle = core;
+    g.beginPath(); g.arc(gx, gy, CS * 0.34, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(255,217,138,0.35)';
+    g.lineWidth = 1.2;
+    g.beginPath();
+    for (let k = 0; k < 16; k++) {
+      const ang = (k / 16) * Math.PI * 2;
+      g.moveTo(gx + Math.cos(ang) * CS * 0.2, gy + Math.sin(ang) * CS * 0.2);
+      g.lineTo(gx + Math.cos(ang) * CS * (k % 2 ? 0.34 : 0.42), gy + Math.sin(ang) * CS * (k % 2 ? 0.34 : 0.42));
+    }
+    g.stroke();
+    // スタートは小さな渦 (左の表のスタート列と同じ見立て)
+    const s0x = mid(sx(0)), s0y = mid(sy(0));
+    g.lineWidth = 1.4;
+    for (let k = 0; k < 3; k++) {
+      g.strokeStyle = k % 2 ? 'rgba(176,107,255,0.45)' : 'rgba(111,240,255,0.5)';
+      g.beginPath();
+      g.arc(s0x, s0y, CS * (0.12 + k * 0.09), k * 2.1, k * 2.1 + Math.PI * 1.3);
+      g.stroke();
+    }
     g.font = '600 13px ui-monospace, Menlo, monospace';
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = 'rgba(111,240,255,0.8)';
-    g.fillText('S', mid(sx(0)), mid(sy(0)));
-    g.fillStyle = 'rgba(255,225,170,0.95)';
-    g.fillText('G', gx, gy);
 
     // 壁
     g.lineCap = 'round';
@@ -367,15 +389,26 @@ class Tutorial {
       else { g.fillStyle = col; g.fill(); }
     }
 
-    // 自分
+    // 自分。2 つの座標をまとめた 1 つの天体なので、x と y の色を混ぜた惑星にする
     const px = mid(sx(this.pos[0])), py = mid(sy(this.pos[1]));
+    const R = 13;
+    const body = g.createLinearGradient(px - R, py - R, px + R, py + R);
+    body.addColorStop(0.15, COL_X);
+    body.addColorStop(0.9, COL_Y);
     g.beginPath();
-    g.arc(px, py, 13, 0, Math.PI * 2);
-    g.fillStyle = '#f2f9ff';
-    g.shadowColor = '#6ff0ff';
-    g.shadowBlur = 22;
+    g.arc(px, py, R, 0, Math.PI * 2);
+    g.fillStyle = body;
+    g.shadowColor = 'rgba(200,230,255,0.9)';
+    g.shadowBlur = 20;
     g.fill();
     g.shadowBlur = 0;
+    // 光の当たり方 (左上が明るく、右下が夜の側)
+    const shade = g.createRadialGradient(px - R * 0.4, py - R * 0.45, 1, px, py, R * 1.1);
+    shade.addColorStop(0, 'rgba(255,255,255,0.7)');
+    shade.addColorStop(0.35, 'rgba(255,255,255,0.08)');
+    shade.addColorStop(1, 'rgba(2,3,10,0.32)');
+    g.fillStyle = shade;
+    g.fill();
 
     // 目盛り (左の表の列番号と対応)
     g.font = '11px ui-monospace, Menlo, monospace';

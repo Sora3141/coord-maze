@@ -73,10 +73,26 @@ body::after {
   background: radial-gradient(ellipse at 50% 42%, transparent 42%, rgba(2, 4, 10, 0.62) 100%);
 }
 
-#stars {
+#stars, #nebula, #horizon {
   position: fixed; inset: 0; z-index: -1;
   width: 100%; height: 100%;
   pointer-events: none;
+}
+/* 手続きで描いた星雲 (src/starfield.js)。粗く描いて引き伸ばすので、ぼかし直さなくても柔らかい */
+#nebula { opacity: 0.55; mix-blend-mode: screen; }
+
+/* 画面の右下に沈む大きな惑星。影の側は背景より暗く、縁だけが恒星の光で細く光る */
+#horizon {
+  inset: auto; right: -38vmax; bottom: -52vmax;
+  width: 90vmax; height: 90vmax; border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(120, 150, 255, 0.10), transparent 40%),
+    radial-gradient(circle at 50% 50%, #03040b 64%, #050814 70.5%, transparent 71%);
+  box-shadow:
+    -2px -2px 0 0 rgba(140, 200, 255, 0.35),
+    -14px -12px 50px -6px rgba(90, 150, 255, 0.35),
+    -40px -30px 140px -20px rgba(150, 90, 255, 0.28);
+  opacity: 0.9;
 }
 
 /* ------------------------------------------------------------------ パネル */

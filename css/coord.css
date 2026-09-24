@@ -13,6 +13,11 @@
 header { padding: calc(34px + var(--sat)) var(--edge) 10px; position: relative; }
 h1 { margin: 0; font-size: 34px; text-shadow: 0 0 30px rgba(111, 240, 255, 0.28); }
 h1 span { color: var(--ion); }
+/* タイトルの紋章。盤面と同じ見立て (軌道・惑星・恒星) を小さく */
+h1 .logo {
+  width: 1.25em; height: 1.25em; vertical-align: -0.24em; margin-right: 0.42em;
+  filter: drop-shadow(0 0 10px rgba(111, 240, 255, 0.35));
+}
 .tagline { margin: 7px 0 0; color: var(--dim); letter-spacing: 0.02em; }
 
 .backs { position: absolute; right: var(--edge); top: 36px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -54,9 +59,12 @@ main {
   -webkit-touch-callout: none;
   touch-action: manipulation;
   overscroll-behavior-x: contain;
+  /* 盤面は宇宙をのぞく窓。右 (恒星の側) がほんのり金色に明るい */
   background:
+    radial-gradient(ellipse 60% 90% at 100% 50%, rgba(255, 190, 110, 0.07), transparent 70%),
+    radial-gradient(ellipse 70% 80% at 0% 0%, rgba(90, 70, 200, 0.10), transparent 70%),
     linear-gradient(rgba(140, 180, 255, 0.05), rgba(140, 180, 255, 0) 40%),
-    rgba(6, 10, 22, 0.62);
+    rgba(5, 8, 20, 0.66);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   backdrop-filter: blur(10px);
@@ -91,52 +99,85 @@ main {
   background: rgba(6, 10, 22, 0.92);
 }
 
-/* 各行は軌道。コマはその上を進む天体という見立て */
+/* 各行は軌道。コマはその上を進む惑星、ゴール列は恒星という見立て。
+   軌道は点線で引き、選んでいる行だけ光がゴールへ向かって流れる。 */
 .track { position: relative; display: flex; gap: var(--gap); }
 .track::before {
-  content: ''; position: absolute; left: 6px; right: 6px; top: 50%;
+  content: ''; position: absolute; left: calc(var(--cell) / 2); right: calc(var(--cell) / 2); top: 50%;
   height: 1px; transform: translateY(-0.5px);
-  background: linear-gradient(90deg, transparent, var(--rowc), transparent);
-  opacity: 0.16; pointer-events: none;
+  background: repeating-linear-gradient(90deg, var(--rowc) 0 5px, transparent 5px 11px);
+  opacity: 0.22; pointer-events: none;
 }
-.row.sel .track::before { opacity: 0.4; }
+.row.sel .track::before {
+  height: 2px; transform: translateY(-1px); opacity: 0.6;
+  animation: orbit-flow 1.1s linear infinite;
+}
+@keyframes orbit-flow { to { background-position: 11px 0; } }
 
+/* マスは軌道上の「停泊点」。四角い箱ではなく、中心に小さな点のある淡い円 */
 .cell {
   width: var(--cell); height: var(--cell);
   flex: none;
-  border-radius: 11px;
-  border: 1px solid rgba(122, 156, 224, 0.13);
-  background: rgba(140, 180, 255, 0.022);
+  border-radius: 50%;
+  border: 1px solid rgba(122, 156, 224, 0.12);
+  background:
+    radial-gradient(circle, rgba(170, 200, 255, 0.28) 0 5%, transparent 6.5%),
+    radial-gradient(circle, rgba(140, 180, 255, 0.05), transparent 70%);
   position: relative;
   transition: border-color 0.16s, background 0.16s, box-shadow 0.16s, transform 0.1s, filter 0.1s;
 }
-.cell.start { border-color: rgba(111, 240, 255, 0.24); }
-.cell.goal {
-  border-color: rgba(255, 217, 138, 0.55);
+
+/* スタートは小さな渦 (ワームホール)。ここから全部の惑星が出発する */
+.cell.start { border-color: rgba(111, 240, 255, 0.28); }
+.cell.start::before {
+  content: ''; position: absolute; inset: 8%; border-radius: 50%; pointer-events: none;
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 217, 138, 0.20), transparent 72%),
-    rgba(255, 217, 138, 0.045);
-  box-shadow: 0 0 22px -8px rgba(255, 217, 138, 0.8), inset 0 0 18px -10px rgba(255, 217, 138, 0.9);
-}
-.cell.start {
-  background:
-    radial-gradient(circle at 50% 50%, rgba(111, 240, 255, 0.10), transparent 72%),
-    rgba(140, 180, 255, 0.022);
+    radial-gradient(circle, rgba(4, 8, 20, 0.9) 0 16%, transparent 30%),
+    repeating-conic-gradient(from 0deg, rgba(111, 240, 255, 0.34) 0 7deg, transparent 7deg 24deg, rgba(176, 107, 255, 0.26) 24deg 31deg, transparent 31deg 45deg);
+  -webkit-mask: radial-gradient(circle, #000 40%, transparent 72%);
+          mask: radial-gradient(circle, #000 40%, transparent 72%);
+  animation: spin 16s linear infinite;
 }
 
-/* 動かせる先 */
+/* ゴールは恒星。白い芯・金色の光球・ゆっくり回るコロナ */
+.cell.goal {
+  border-color: rgba(255, 217, 138, 0.28);
+  background:
+    radial-gradient(circle, #fffbea 0 9%, #ffe3a0 15%, rgba(255, 186, 84, 0.72) 26%,
+                    rgba(255, 140, 50, 0.22) 44%, transparent 64%);
+  box-shadow: 0 0 28px -6px rgba(255, 200, 110, 0.85);
+}
+.cell.goal::before {
+  content: ''; position: absolute; inset: -16%; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 217, 138, 0.26) 0 3deg, transparent 3deg 13deg);
+  -webkit-mask: radial-gradient(circle, transparent 26%, #000 36%, transparent 68%);
+          mask: radial-gradient(circle, transparent 26%, #000 36%, transparent 68%);
+  animation: spin 48s linear infinite;
+}
+@keyframes spin { to { transform: rotate(1turn); } }
+
+/* 動かせる先。まだ行っていない状態へは、行の色で脈打つ輪 */
 .cell.can { cursor: pointer; }
 .cell.can.fresh {
   border-color: var(--rowc);
-  background: color-mix(in srgb, var(--rowc) 14%, transparent);
-  box-shadow: 0 0 18px -5px var(--rowc), inset 0 0 14px -8px var(--rowc);
+  background:
+    radial-gradient(circle, var(--rowc) 0 6%, transparent 7.5%),
+    radial-gradient(circle, color-mix(in srgb, var(--rowc) 18%, transparent), transparent 72%);
+  box-shadow: 0 0 16px -4px var(--rowc), inset 0 0 12px -6px var(--rowc);
+  animation: beacon 1.8s ease-in-out infinite;
 }
-/* 通ったことのある状態へ戻る手。暗くしすぎると「行き先が出ていない」ように見えるので、
-   素のマスとははっきり差をつける。 */
+@keyframes beacon {
+  50% { box-shadow: 0 0 22px -2px var(--rowc), 0 0 0 3px color-mix(in srgb, var(--rowc) 22%, transparent),
+                    inset 0 0 12px -6px var(--rowc); }
+}
+.cell.goal.can.fresh { background:
+    radial-gradient(circle, #fffbea 0 9%, #ffe3a0 15%, rgba(255, 186, 84, 0.72) 26%,
+                    rgba(255, 140, 50, 0.22) 44%, transparent 64%); }
+/* 通ったことのある状態へ戻る手。脈打たせず、点を大きめに出して「行ける」ことだけ伝える */
 .cell.can.been {
-  border-color: rgba(150, 180, 235, 0.62);
-  background: rgba(122, 156, 224, 0.10);
-  box-shadow: inset 0 0 12px -6px rgba(170, 200, 255, 0.9);
+  border-color: rgba(150, 180, 235, 0.58);
+  background: radial-gradient(circle, rgba(122, 156, 224, 0.12), transparent 72%);
+  box-shadow: inset 0 0 10px -5px rgba(170, 200, 255, 0.9);
 }
 .cell.can.been::after {
   content: ''; position: absolute; left: 50%; top: 50%;
@@ -153,28 +194,146 @@ main {
   50% { box-shadow: 0 0 0 3px var(--star), 0 0 26px -4px var(--star); }
 }
 
-/* コマ本体。軌道上の天体 */
+/* ------------------------------------------------------------------ 惑星 */
+
+/* コマの入れ物。位置だけを受け持つ (中の惑星・光跡は下) */
 .token {
-  position: absolute; left: 0; top: 0;
+  position: absolute; left: 0; top: 0; z-index: 1;
   width: var(--cell); height: var(--cell);
   transform: translateX(calc(var(--c) * (var(--cell) + var(--gap))));
-  transition: transform 0.16s cubic-bezier(0.3, 0.9, 0.35, 1);
+  transition: transform 0.18s cubic-bezier(0.3, 0.9, 0.35, 1);
   pointer-events: none;
 }
-.token::before {
-  content: ''; position: absolute; inset: 13%;
-  border-radius: 50%;
+
+/* 惑星の本体。下地は行の色の球 (左上から光が当たる)。
+   --surface に模様を重ね、::before で陰と大気の縁を、::after で輪や衛星を描く。 */
+.planet {
+  --lit: color-mix(in srgb, var(--rowc) 45%, #fff);
+  --dark: color-mix(in srgb, var(--rowc) 30%, #04050c);
+  --surface: linear-gradient(transparent, transparent);
+  position: absolute; inset: 15%; border-radius: 50%;
   background:
-    radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.92), transparent 46%),
-    radial-gradient(circle at 50% 50%, var(--rowc), color-mix(in srgb, var(--rowc) 55%, #06080f));
-  box-shadow: 0 0 22px -3px var(--rowc), 0 0 46px -12px var(--rowc);
+    var(--surface),
+    radial-gradient(circle at 36% 32%, var(--lit), var(--rowc) 42%, var(--dark) 100%);
+  box-shadow: 0 0 18px -4px var(--rowc), 0 0 40px -14px var(--rowc);
+  transition: box-shadow 0.3s;
 }
-.token.bump { animation: bump 0.22s; }
-@keyframes bump { 50% { filter: brightness(0.45) saturate(0.4); } }
+.planet::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.62), transparent 26%),
+    radial-gradient(circle at 76% 80%, rgba(2, 3, 10, 0.78), transparent 64%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10), inset 0.06em 0.08em 0.3em rgba(255, 255, 255, 0.12);
+}
+.planet::after { content: none; }
+
+/* 0: 縞のガス惑星と、大きな渦 */
+.planet.p0 { --surface:
+  radial-gradient(ellipse 20% 12% at 62% 63%, rgba(255, 238, 220, 0.6), transparent 72%),
+  repeating-linear-gradient(8deg, transparent 0 13%, rgba(255, 255, 255, 0.16) 13% 19%,
+                            transparent 19% 27%, rgba(0, 0, 0, 0.2) 27% 34%); }
+
+/* 1: 輪のある惑星。輪の奥側は薄く、手前側は濃く描いて球の前を横切らせる */
+.planet.p1 { --surface:
+  repeating-linear-gradient(-16deg, transparent 0 22%, rgba(255, 255, 255, 0.12) 22% 27%); }
+.planet.p1::after, .planet.p5::after {
+  content: ''; position: absolute; left: -42%; right: -42%; top: 38%; height: 24%;
+  border-radius: 50%;
+  border: max(1.5px, 0.09em) solid color-mix(in srgb, var(--rowc) 45%, #fff);
+  border-top-color: color-mix(in srgb, var(--rowc) 30%, transparent);
+  transform: rotate(-17deg);
+  box-shadow: 0 0 10px -3px var(--rowc);
+}
+
+/* 2: クレーターの岩石惑星 */
+.planet.p2 { --surface:
+  radial-gradient(circle at 30% 60%, rgba(0, 0, 0, 0.30) 0 10%, rgba(255, 255, 255, 0.10) 11%, transparent 13%),
+  radial-gradient(circle at 63% 30%, rgba(0, 0, 0, 0.26) 0 7%, rgba(255, 255, 255, 0.10) 8%, transparent 10%),
+  radial-gradient(circle at 70% 66%, rgba(0, 0, 0, 0.24) 0 5%, transparent 7%),
+  radial-gradient(circle at 44% 36%, rgba(0, 0, 0, 0.18) 0 4%, transparent 5.5%),
+  radial-gradient(circle at 48% 82%, rgba(0, 0, 0, 0.2) 0 4%, transparent 5.5%); }
+
+/* 3: 氷の惑星。両極の白い氷冠と、薄い筋 */
+.planet.p3 { --surface:
+  radial-gradient(ellipse 62% 24% at 50% 3%, rgba(255, 255, 255, 0.85), transparent 72%),
+  radial-gradient(ellipse 50% 18% at 50% 98%, rgba(255, 255, 255, 0.6), transparent 72%),
+  repeating-linear-gradient(-32deg, transparent 0 16%, rgba(255, 255, 255, 0.12) 16% 18%); }
+
+/* 4: 溶岩の惑星。暗い地表に光る割れ目 */
+.planet.p4 {
+  --surface:
+    radial-gradient(circle at 42% 56%, rgba(255, 226, 170, 0.75) 0 4%, transparent 9%),
+    radial-gradient(circle at 66% 36%, rgba(255, 226, 170, 0.6) 0 3%, transparent 7%),
+    repeating-linear-gradient(58deg, transparent 0 17%, rgba(255, 210, 150, 0.32) 17% 19.5%),
+    repeating-linear-gradient(-38deg, transparent 0 23%, rgba(255, 210, 150, 0.22) 23% 25%);
+  background:
+    var(--surface),
+    radial-gradient(circle at 36% 32%, var(--rowc), var(--dark) 70%);
+}
+
+/* 5: 縦に近い輪を持つ青白い惑星 (天王星のように横倒し) */
+.planet.p5 { --surface:
+  linear-gradient(90deg, rgba(255, 255, 255, 0.10), transparent 40%, rgba(255, 255, 255, 0.08)); }
+.planet.p5::after { transform: rotate(72deg); left: -30%; right: -30%; }
+
+/* 6: 衛星を連れた惑星。小さな月がまわりを回る */
+.planet.p6 { --surface:
+  radial-gradient(ellipse 34% 20% at 38% 64%, rgba(0, 0, 0, 0.18), transparent 70%),
+  radial-gradient(ellipse 26% 16% at 66% 34%, rgba(255, 255, 255, 0.14), transparent 70%); }
+.planet.p6::after {
+  content: ''; position: absolute; left: 39%; top: 39%; width: 22%; height: 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #b9c3d8 60%, #4b5468);
+  animation: moon 7s linear infinite;
+}
+@keyframes moon {
+  from { transform: rotate(0deg) translateX(330%) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(330%) rotate(-360deg); }
+}
+
+/* 7: 雲の渦巻く、地球のような惑星 */
+.planet.p7 { --surface:
+  radial-gradient(ellipse 30% 14% at 34% 34%, rgba(255, 255, 255, 0.55), transparent 70%),
+  radial-gradient(ellipse 26% 12% at 64% 60%, rgba(255, 255, 255, 0.45), transparent 70%),
+  radial-gradient(ellipse 20% 10% at 42% 78%, rgba(255, 255, 255, 0.35), transparent 70%),
+  conic-gradient(from 40deg at 56% 46%, transparent 0 20%, rgba(0, 0, 0, 0.16) 20% 34%, transparent 34% 60%,
+                 rgba(0, 0, 0, 0.12) 60% 72%, transparent 72%); }
+
+/* 動いた瞬間の光跡。進んだ向きの反対側 (来た側) に、行の色で短く尾を引く */
+.trail {
+  position: absolute; top: 45%; height: 10%; left: -60%; right: 50%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--rowc));
+  transform-origin: 100% 50%;
+  transform: scaleX(var(--dir, 1));
+  opacity: 0; pointer-events: none;
+}
+.token.fly .trail { animation: trail 0.42s ease-out; }
+@keyframes trail {
+  0% { opacity: 0.9; clip-path: inset(0 0 0 0); }
+  100% { opacity: 0; clip-path: inset(0 0 0 75%); }
+}
+
+.token.bump .planet { animation: bump 0.22s; }
+@keyframes bump {
+  25% { transform: translateX(-6%); filter: brightness(0.5) saturate(0.4); }
+  75% { transform: translateX(6%); }
+}
+
+/* 恒星に着いた惑星は、金色の光を浴びる。✓ は小さな印にして惑星の絵を隠さない */
+.token.done .planet { box-shadow: 0 0 22px 1px rgba(255, 217, 138, 0.75), 0 0 0 1.5px rgba(255, 230, 170, 0.9); }
 .token.done::after {
-  content: '✓'; position: absolute; inset: 0;
-  display: grid; place-items: center;
-  color: rgba(0, 0, 0, 0.62); font-size: 20px; font-weight: 700;
+  content: '✓'; position: absolute; right: 2%; bottom: 2%;
+  width: max(12px, 34%); height: max(12px, 34%);
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--star); color: #3a2600;
+  font-size: max(8px, calc(var(--cell) * 0.2)); font-weight: 800; line-height: 1;
+  box-shadow: 0 0 10px rgba(255, 217, 138, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row.sel .track::before, .cell.start::before, .cell.goal::before,
+  .cell.can.fresh, .planet.p6::after, .token.fly .trail { animation: none; }
 }
 
 /* 右カラムの見出しは、スマホでは開閉できる見出しになる (details/summary) */
@@ -268,6 +427,40 @@ button.sound { margin-bottom: 16px; }
 
 /* ---------------------------------------------------------------- 結果 */
 
+/* クリアの光。恒星の色の輪が 3 重に広がり、うしろで光条がゆっくり回る */
+.burst { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.burst::before {
+  content: ''; position: absolute; left: 50%; top: 42%; width: 140vmax; height: 140vmax;
+  margin: -70vmax 0 0 -70vmax;
+  background: repeating-conic-gradient(rgba(255, 217, 138, 0.05) 0 4deg, transparent 4deg 14deg);
+  -webkit-mask: radial-gradient(circle, #000 0, transparent 55%);
+          mask: radial-gradient(circle, #000 0, transparent 55%);
+  animation: spin 60s linear infinite, burst-in 0.8s ease-out;
+}
+.burst i {
+  position: absolute; left: 50%; top: 42%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+  border-radius: 50%; border: 2px solid rgba(255, 217, 138, 0.8);
+  box-shadow: 0 0 24px rgba(255, 200, 110, 0.5), inset 0 0 16px rgba(255, 200, 110, 0.3);
+  opacity: 0; animation: ring 1.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.burst i:nth-child(2) { animation-delay: 0.18s; border-color: rgba(111, 240, 255, 0.7); }
+.burst i:nth-child(3) { animation-delay: 0.36s; border-color: rgba(176, 107, 255, 0.7); }
+/* scale で広げると線まで太るので、大きさそのものを広げる (輪は 3 つだけなので軽い) */
+@keyframes ring {
+  0% { width: 16px; height: 16px; margin: -8px 0 0 -8px; opacity: 1; }
+  100% { width: 170vmax; height: 170vmax; margin: -85vmax 0 0 -85vmax; opacity: 0; }
+}
+@keyframes burst-in { from { opacity: 0; } }
+#win .sheet { position: relative; }
+#win .sheet h2 {
+  background: linear-gradient(90deg, var(--star), #fff3d6 50%, var(--star));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none; filter: drop-shadow(0 0 16px rgba(255, 217, 138, 0.45));
+}
+@media (prefers-reduced-motion: reduce) {
+  .burst::before, .burst i { animation: none; }
+}
+
 .confirm-body { line-height: 1.95; margin: 0 0 20px; color: #b6c6e0; }
 .sheet h2 { margin: 0 0 18px; font-size: 24px; letter-spacing: 0.06em; }
 .win-note { margin: -10px 0 18px; color: var(--star); font-size: 13px; }
@@ -329,7 +522,8 @@ button.sound { margin-bottom: 16px; }
 
   /* ヘッダーは 1 画面ぶんの高さを食わない程度に詰める */
   header { padding-top: calc(16px + var(--sat)); padding-bottom: 4px; }
-  h1 { font-size: 24px; }
+  h1 { font-size: 22px; letter-spacing: 0.1em; white-space: nowrap; }
+  h1 .logo { margin-right: 0.3em; }
   .tagline { font-size: 12px; margin-top: 4px; }
   .menu-btn { padding: 9px 12px; }
 
@@ -392,8 +586,8 @@ button.sound { margin-bottom: 16px; }
   .opts button { min-width: 42px; padding: 9px 2px; }
 }
 
-/* いちばん狭い画面では、メニューは三本線だけにしてタイトルに場所を譲る */
-@media (max-width: 380px) {
+/* 狭いスマホでは、メニューは三本線だけにしてタイトル (と紋章) に場所を譲る */
+@media (max-width: 420px) {
   h1 { font-size: 21px; }
   .menu-label { display: none; }
   .menu-btn { padding: 10px 13px; }

@@ -1,11 +1,11 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=29ae2268';
-import { randomSeedString } from './rng.js?v=29ae2268';
-import { CoordBoard } from './coordboard.js?v=29ae2268';
-import { confirmDialog, isDialogOpen } from './ui.js?v=29ae2268';
-import { installStarfield } from './starfield.js?v=29ae2268';
-import { saveGame, loadGame, clearGame } from './save.js?v=29ae2268';
-import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=29ae2268';
-import { sound, armSound } from './sound.js?v=29ae2268';
+import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=348fa90d';
+import { randomSeedString } from './rng.js?v=348fa90d';
+import { CoordBoard } from './coordboard.js?v=348fa90d';
+import { confirmDialog, isDialogOpen } from './ui.js?v=348fa90d';
+import { installStarfield } from './starfield.js?v=348fa90d';
+import { saveGame, loadGame, clearGame } from './save.js?v=348fa90d';
+import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=348fa90d';
+import { sound, armSound } from './sound.js?v=348fa90d';
 
 const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
