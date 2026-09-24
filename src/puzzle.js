@@ -1,6 +1,6 @@
-import { MazeND } from './mazend.js?v=8c8e47f0';
-import { hashSeed } from './rng.js?v=8c8e47f0';
-import { HierMaze } from './hmaze.js?v=8c8e47f0';
+import { MazeND } from './mazend.js?v=a50dbc4c';
+import { hashSeed } from './rng.js?v=a50dbc4c';
+import { HierMaze } from './hmaze.js?v=a50dbc4c';
 
 /**
  * 座標迷路 (COORD MAZE) の出題を作る。
@@ -18,8 +18,20 @@ import { HierMaze } from './hmaze.js?v=8c8e47f0';
  */
 export const EXPLICIT_MAX = 1_200_000;
 
-/** 出題できる状態数の上限。10 次元 10 マス (100 億状態) まで、すべての組み合わせを選べる。 */
+/** ふつうに選べる大きさ。この範囲 (10 次元 10 マス = 100 億状態まで) は、すべての組み合わせを選べる。 */
+export const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+export const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 export const MAX_STATES = 10_000_000_000;
+
+/**
+ * 「もっと大きく」で増える大きさ。
+ * 状態の番号を JavaScript の数値で持っているので、正確に表せる 2^53 (約 9,000 兆) を超えられない。
+ * その手前の 5,000 兆までにしてある (12 次元 20 マス・10 次元 36 マス・5 次元 1000 マスなど)。
+ * このあたりは生成に数秒かかり、最短手数も数万〜数十万手になる。
+ */
+export const MORE_RANKS = [11, 12];
+export const MORE_WIDTHS = [12, 15, 20, 25, 30, 36, 50, 90, 100, 200, 400, 1000];
+export const MORE_MAX_STATES = 5_000_000_000_000_000;
 
 /**
  * HierMaze の作り方。道筋を先に引くだけの、素直な作り方にしてある

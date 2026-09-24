@@ -412,6 +412,11 @@ aside a { color: var(--ion); }
 .opts { display: flex; gap: 6px; flex-wrap: wrap; }
 .opts button { flex: 1 0 auto; min-width: 46px; padding: 8px 4px; font-variant-numeric: tabular-nums; }
 .opts button:disabled { opacity: 0.22; cursor: not-allowed; }
+.opts button[hidden] { display: none; }
+/* 「もっと大きく」で増えたボタンは、少し色を変えて上級だと分かるように */
+.opts button.more { border-style: dashed; }
+.opts button.more.on { border-style: solid; }
+button.more-toggle { margin: -4px 0 16px; font-size: 12px; color: var(--dim); }
 button.wide { width: 100%; }
 /* 設定の先頭に置く効果音の切り替え */
 button.sound { margin-bottom: 16px; }

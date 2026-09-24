@@ -1,4 +1,4 @@
-import { mulberry32, hashSeed } from './rng.js?v=8c8e47f0';
+import { mulberry32, hashSeed } from './rng.js?v=a50dbc4c';
 
 /**
  * 階層的な暗黙の迷路 (大きい盤面用)。
@@ -308,7 +308,7 @@ class Block {
    */
   door(a, b) {
     const lo = Math.min(a, b), hi = Math.max(a, b);
-    const id = lo * 4096 + hi;
+    const id = lo * this.gsize + hi;
     let d = this.doors.get(id);
     if (d) return d;
     const rank = this.lo.length;

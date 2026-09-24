@@ -1,18 +1,25 @@
-import { makeCoordPuzzle, statesOf, MAX_STATES } from './puzzle.js?v=8c8e47f0';
-import { randomSeedString } from './rng.js?v=8c8e47f0';
-import { CoordBoard } from './coordboard.js?v=8c8e47f0';
-import { confirmDialog, isDialogOpen } from './ui.js?v=8c8e47f0';
-import { installStarfield } from './starfield.js?v=8c8e47f0';
-import { installShare } from './share.js?v=8c8e47f0';
-import { saveGame, loadGame, clearGame } from './save.js?v=8c8e47f0';
-import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=8c8e47f0';
-import { sound, armSound } from './sound.js?v=8c8e47f0';
+import {
+  makeCoordPuzzle, statesOf, RANKS, WIDTHS, MAX_STATES, MORE_RANKS, MORE_WIDTHS, MORE_MAX_STATES,
+} from './puzzle.js?v=a50dbc4c';
+import { randomSeedString } from './rng.js?v=a50dbc4c';
+import { CoordBoard } from './coordboard.js?v=a50dbc4c';
+import { confirmDialog, isDialogOpen } from './ui.js?v=a50dbc4c';
+import { installStarfield } from './starfield.js?v=a50dbc4c';
+import { installShare } from './share.js?v=a50dbc4c';
+import { saveGame, loadGame, clearGame } from './save.js?v=a50dbc4c';
+import { addClear, loadRecords, summarize, clearRecords, sizeLabel } from './records.js?v=a50dbc4c';
+import { sound, armSound } from './sound.js?v=a50dbc4c';
 
-const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
-const WIDTHS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+// 「もっと大きく」を押すと、MORE_RANKS / MORE_WIDTHS のボタンも出る
+const ALL_RANKS = [...RANKS, ...MORE_RANKS];
+const ALL_WIDTHS = [...WIDTHS, ...MORE_WIDTHS];
 
 // 状態数 = マス数 ^ 次元数 で爆発する。上限を超える組み合わせは押せなくする。
-const OVER_NOTE = `状態数が上限 (${MAX_STATES.toLocaleString('en-US')}) を超えます`;
+const overNote = (limit) => `状態数が上限 (${limit.toLocaleString('en-US')}) を超えます`;
+
+// ふつうの範囲に入らない大きさか (「もっと大きく」で選ぶもの)
+const isMore = (rank, width) => !RANKS.includes(rank) || !WIDTHS.includes(width)
+  || statesOf(rank, width) > MAX_STATES;
 
 const $ = (id) => document.getElementById(id);
 
@@ -31,6 +38,7 @@ class CoordMaze {
     this.pickRank = this.rank;
     this.pickWidth = this.width;
     this.selected = 0;
+    this.more = false;         // 「もっと大きく」を開いているか
     this.#initOptions();
     this.#initEvents();
     $('btn-sound').classList.toggle('on', sound.enabled);
@@ -38,12 +46,15 @@ class CoordMaze {
 
     // 前に遊んでいた盤面が残っていれば、その続きから始める
     const saved = loadGame();
-    const usable = saved && RANKS.includes(saved.rank) && WIDTHS.includes(saved.width)
-      && statesOf(saved.rank, saved.width) <= MAX_STATES;
+    const usable = saved && ALL_RANKS.includes(saved.rank) && ALL_WIDTHS.includes(saved.width)
+      && statesOf(saved.rank, saved.width) <= MORE_MAX_STATES;
     if (usable) {
       this.rank = this.pickRank = saved.rank;
       this.width = this.pickWidth = saved.width;
+      // 大きいサイズで遊んでいた続きなら、「もっと大きく」を開いたままにしておく
+      if (isMore(saved.rank, saved.width)) this.more = true;
     }
+    this.#syncOptions();
     $('seed').value = usable ? saved.seed : randomSeedString();
     this.newGame({ seed: $('seed').value, restore: usable ? saved : null });
     this.#renderRecords();
@@ -53,18 +64,23 @@ class CoordMaze {
   // ------------------------------------------------------------------ 初期化
 
   #initOptions() {
-    const build = (host, values, set) => {
+    const build = (host, values, extra, set) => {
       host.innerHTML = '';
-      for (const v of values) {
+      for (const v of [...values, ...extra]) {
         const b = document.createElement('button');
         b.textContent = `${v}`;
         b.dataset.v = `${v}`;
+        if (extra.includes(v)) b.classList.add('more');
         b.addEventListener('click', () => { set(v); this.#syncOptions(); });
         host.appendChild(b);
       }
     };
-    build($('opt-rank'), RANKS, (v) => { this.pickRank = v; });
-    build($('opt-width'), WIDTHS, (v) => { this.pickWidth = v; });
+    build($('opt-rank'), RANKS, MORE_RANKS, (v) => { this.pickRank = v; });
+    build($('opt-width'), WIDTHS, MORE_WIDTHS, (v) => { this.pickWidth = v; });
+    $('btn-more').addEventListener('click', () => {
+      this.more = !this.more;
+      this.#syncOptions();
+    });
     this.#syncOptions();
   }
 
@@ -73,28 +89,39 @@ class CoordMaze {
    * 次元数を上げたことで今のマス数が使えなくなったときは、使える最大に落とす。
    */
   #syncOptions() {
-    if (statesOf(this.pickRank, this.pickWidth) > MAX_STATES) {
-      const fit = WIDTHS.filter((w) => statesOf(this.pickRank, w) <= MAX_STATES);
-      this.pickWidth = fit.length ? fit[fit.length - 1] : WIDTHS[0];
+    // 「もっと大きく」を閉じたら、選んでいた大きいサイズはふつうの範囲に戻す
+    const ranks = this.more ? ALL_RANKS : RANKS;
+    const widths = this.more ? ALL_WIDTHS : WIDTHS;
+    const limit = this.more ? MORE_MAX_STATES : MAX_STATES;
+    if (!ranks.includes(this.pickRank)) this.pickRank = ranks[ranks.length - 1];
+    if (!widths.includes(this.pickWidth) || statesOf(this.pickRank, this.pickWidth) > limit) {
+      const fit = widths.filter((w) => statesOf(this.pickRank, w) <= limit);
+      this.pickWidth = fit.length ? fit[fit.length - 1] : widths[0];
     }
     for (const el of $('opt-rank').children) {
       const v = Number(el.dataset.v);
       el.classList.toggle('on', v === this.pickRank);
-      el.disabled = statesOf(v, WIDTHS[0]) > MAX_STATES;
-      el.title = el.disabled ? OVER_NOTE : '';
+      el.hidden = !ranks.includes(v);
+      el.disabled = statesOf(v, WIDTHS[0]) > limit;
+      el.title = el.disabled ? overNote(limit) : '';
     }
     for (const el of $('opt-width').children) {
       const v = Number(el.dataset.v);
       el.classList.toggle('on', v === this.pickWidth);
-      el.disabled = statesOf(this.pickRank, v) > MAX_STATES;
-      el.title = el.disabled ? OVER_NOTE : '';
+      el.hidden = !widths.includes(v);
+      el.disabled = statesOf(this.pickRank, v) > limit;
+      el.title = el.disabled ? overNote(limit) : '';
     }
+    $('btn-more').classList.toggle('on', this.more);
+    $('btn-more').textContent = this.more ? '大きいサイズを隠す' : 'もっと大きく（上級）';
+
     const states = statesOf(this.pickRank, this.pickWidth);
     const pending = this.pickRank !== this.rank || this.pickWidth !== this.width;
+    const heavy = states > 1e12 ? '。作るのに数秒かかることがあります' : '';
     $('states').innerHTML = `${this.pickWidth}^${this.pickRank} = ${states.toLocaleString('en-US')} 通り`
       + `<span>${pending
         ? `いまの盤面は ${this.rank} 次元 ${this.width} マス。「この設定で作る」で切り替わります`
-        : 'すべての状態に行ける迷路'}</span>`;
+        : 'すべての状態に行ける迷路'}${heavy}</span>`;
   }
 
   #initEvents() {
@@ -414,6 +441,7 @@ class CoordMaze {
     if (!await this.#confirmDiscard('この問題をもう一度遊びますか？', 'もう一度遊ぶ')) return;
     this.rank = this.pickRank = rec.rank;
     this.width = this.pickWidth = rec.width;
+    if (isMore(rec.rank, rec.width)) this.more = true;
     $('seed').value = rec.seed;
     document.body.classList.remove('menu-open');
     $('btn-menu').setAttribute('aria-expanded', 'false');

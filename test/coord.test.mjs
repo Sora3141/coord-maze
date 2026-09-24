@@ -1,6 +1,9 @@
 // 座標迷路 (COORD MAZE) の検証:  node test/coord.test.mjs
 
-import { makeCoordPuzzle, statesOf, MAX_STATES, EXPLICIT_MAX } from '../src/puzzle.js';
+import {
+  makeCoordPuzzle, statesOf, MAX_STATES, EXPLICIT_MAX, RANKS, WIDTHS, MORE_RANKS, MORE_WIDTHS, MORE_MAX_STATES,
+} from '../src/puzzle.js';
+import { LETTERS } from '../src/coordboard.js';
 import { HierMaze } from '../src/hmaze.js';
 
 let fails = 0;
@@ -212,6 +215,53 @@ for (const [rank, width] of [[7, 8], [8, 8], [9, 9], [10, 10]]) {
   check(s && m.isOpen(x, s[0], s[1]), `${where}: 寄り道した先でヒントが出ない`);
   console.log(`  ${where} (状態 ${statesOf(rank, width).toLocaleString('en-US')}): `
     + `最短 ${puzzle.par} 手 / 直線距離 ${rank * (width - 1)} 手 / 生成 ${ms.toFixed(0)}ms / ヒント 1 手 ${perStep.toFixed(2)}ms`);
+}
+
+// ------------------------------------------------ 「もっと大きく」で選べる大きさ
+
+console.log('\n「もっと大きく」で選べる大きさ');
+{
+  let choosable = 0;
+  for (const r of [...RANKS, ...MORE_RANKS]) {
+    for (const w of [...WIDTHS, ...MORE_WIDTHS]) {
+      if (statesOf(r, w) > MORE_MAX_STATES) continue;
+      choosable++;
+      // 状態の番号を JavaScript の数値で正確に表せる範囲に収まっている
+      check(statesOf(r, w) <= Number.MAX_SAFE_INTEGER, `${r}次元${w}マス: 状態の番号が正確に表せない`);
+    }
+  }
+  check(Math.max(...MORE_RANKS) <= LETTERS.length, '軸の名前が足りない');
+  console.log(`  選べる組み合わせ ${choosable} 通り (状態数 ${MORE_MAX_STATES.toLocaleString('en-US')} まで)`);
+}
+// 2 次元 1000 マスは 100 万状態なので MazeND。nextStep が 1 回ごとに幅優先をやり直すので、
+// 最後までたどらずに、経路の数か所だけ確かめる
+{
+  const puzzle = makeCoordPuzzle({ rank: 2, width: 1000, seedText: 'AAA' });
+  const m = puzzle.maze;
+  const path = m.path(m.start, m.goal);
+  check(!isHier(m) && path.length - 1 === puzzle.par, '2次元1000マス: 最短手数が経路と合わない');
+  for (const k of [0, path.length >> 1, path.length - 2]) {
+    const [a, sign] = m.nextStep(path[k], m.goal);
+    check(path[k] + sign * m.strides[a] === path[k + 1], '2次元1000マス: ヒントが最短の手でない');
+  }
+  console.log(`  2次元1000マス (状態 1,000,000): 最短 ${puzzle.par} 手`);
+}
+// 階層的な迷路は、ヒントを最後までたどる
+for (const [rank, width] of [[12, 10], [3, 1000]]) {
+  const t0 = performance.now();
+  const puzzle = makeCoordPuzzle({ rank, width, seedText: 'AAA' });
+  const ms = performance.now() - t0;
+  const m = puzzle.maze;
+  const where = `${rank}次元${width}マス`;
+  check(puzzle.par > rank * (width - 1), `${where}: 直線距離で解けてしまう`);
+  let cur = m.start, n = 0;
+  for (; cur !== m.goal && n <= puzzle.par; n++) {
+    const [a, sign] = m.nextStep(cur, m.goal);
+    check(m.isOpen(cur, a, sign), `${where}: ヒントが壁を抜ける`);
+    cur += sign * m.strides[a];
+  }
+  check(cur === m.goal && n === puzzle.par, `${where}: ヒントをたどっても最短手数でゴールに着かない`);
+  console.log(`  ${where} (状態 ${statesOf(rank, width).toLocaleString('en-US')}): 最短 ${puzzle.par} 手 / 生成 ${ms.toFixed(0)}ms`);
 }
 
 // ------------------------------------------------- 読み込み URL の版

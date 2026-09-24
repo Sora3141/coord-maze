@@ -244,6 +244,23 @@ export class CoordBoard {
     }
     // 次に描くときの「前の位置」。渡された配列はあとで書き換わるので写しを持つ
     this.shown = [...state.pos];
+    // 横に流れる盤面では、選んでいる行のコマ (と両隣) が見えるところまでスクロールを追わせる
+    if (this.host.classList.contains('scrolls') && state.selected >= 0) {
+      this.#reveal(state.selected, state.pos[state.selected]);
+    }
+  }
+
+  /** a 行の c 列のマスと、その両隣が盤面の中に見えるようにする。 */
+  #reveal(a, c) {
+    const { row, cells } = this.rows[a];
+    const box = this.host.getBoundingClientRect();
+    // 左端には軸名が貼り付いているので、そのぶんは見えていないものとして扱う
+    const label = row.querySelector('.rowlabel').getBoundingClientRect().width;
+    const left = cells[Math.max(0, c - 1)].getBoundingClientRect().left;
+    const right = cells[Math.min(cells.length - 1, c + 1)].getBoundingClientRect().right;
+    const minX = box.left + label + 16, maxX = box.right - 16;
+    if (left < minX) this.host.scrollLeft -= minX - left;
+    else if (right > maxX) this.host.scrollLeft += right - maxX;
   }
 
   /** 壁にぶつかったことを一瞬だけ見せる。 */
