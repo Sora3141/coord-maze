@@ -9,11 +9,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="COORD MAZE" />
 <title>COORD MAZE — 座標迷路</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="icon-180.png" />
-<link rel="manifest" href="manifest.webmanifest" />
-<link rel="stylesheet" href="css/space.css?v=348fa90d" />
-<link rel="stylesheet" href="css/coord.css?v=348fa90d" />
+<meta name="description" content="N 次元迷路を、座標だけで表したパズル。10 次元まで、同じ画面で遊べます。" />
+<!-- リンクを貼ったときのカード (SNS・メッセージアプリ) -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sora3141.github.io/coord-maze/" />
+<meta property="og:title" content="COORD MAZE — 座標迷路" />
+<meta property="og:description" content="N 次元迷路を、座標だけで表したパズル。10 次元まで、同じ画面で遊べます。" />
+<meta property="og:image" content="https://sora3141.github.io/coord-maze/icon-512.png" />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="icon.svg?v=28e315ca" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-180.png?v=28e315ca" />
+<link rel="manifest" href="manifest.webmanifest?v=28e315ca" />
+<link rel="stylesheet" href="css/space.css?v=d3edcc60" />
+<link rel="stylesheet" href="css/coord.css?v=d3edcc60" />
 </head>
 <body>
 
@@ -36,6 +44,7 @@
   </svg>COORD <span>MAZE</span></h1>
   <p class="tagline">N 次元迷路を、座標だけで表したパズル</p>
   <div class="backs">
+    <button class="back share" data-share><svg class="share-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>シェア</button>
     <a class="back" href="tutorial.html">はじめての方へ（チュートリアル）</a>
   </div>
   <!-- 画面が狭いときだけ出る。ルール・設定・説明はこの中にしまう -->
@@ -68,6 +77,8 @@
       <a class="btnlink primary" href="tutorial.html">はじめての方へ（チュートリアル）</a>
       <button id="btn-menu-close" class="close" aria-label="閉じる">✕</button>
     </div>
+    <!-- 狭い画面ではヘッダーのシェアが隠れるので、引き出しの先頭に置く -->
+    <button class="wide share side-share" data-share><svg class="share-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg>このゲームをシェア</button>
 
     <details class="sec" open>
     <summary><h2>ルール</h2></summary>
@@ -155,6 +166,6 @@
   </div>
 </div>
 
-<script type="module" src="./src/coord.js?v=348fa90d"></script>
+<script type="module" src="./src/coord.js?v=d3edcc60"></script>
 </body>
 </html>

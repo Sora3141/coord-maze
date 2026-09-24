@@ -344,10 +344,29 @@ main {
 
 .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
 
+/* ---------------------------------------------------------------- シェア */
+
+button.back { font-size: inherit; font-family: inherit; cursor: pointer; }
+button.share { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.share-ico {
+  width: 15px; height: 15px; flex: none;
+  fill: currentColor; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round;
+}
+
+/* 画面の下に一瞬だけ出る知らせ (「リンクをコピーしました」) */
+.toast {
+  position: fixed; left: 50%; bottom: calc(96px + var(--sab)); z-index: 60;
+  transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+  padding: 10px 18px; border-radius: 999px; white-space: nowrap;
+  background: rgba(9, 14, 28, 0.94); border: 1px solid var(--ion); color: var(--ion);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
 /* ------------------------------------------------- メニュー (狭い画面用) */
 
 /* 広い画面では右カラムをそのまま出すので、ボタンも背景も要らない */
-.menu-btn, .scrim, .side-head { display: none; }
+.menu-btn, .scrim, .side-head, button.side-share { display: none; }
 
 .menu-btn {
   position: absolute; right: var(--edge); top: 30px;
@@ -484,6 +503,7 @@ button.sound { margin-bottom: 16px; }
   /* 画面はパズルと操作ボタンだけにして、説明と設定は引き出しにしまう */
   .backs { display: none; }
   .side-head { display: flex; }
+  button.side-share { display: flex; margin: 10px 0 14px; }
 
   /* タイトルとメニューを 1 行に並べる (絶対配置だと狭い画面で重なる) */
   header { display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; }

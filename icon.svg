@@ -1,91 +1,157 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!-- COORD MAZE のアイコン。盤面と同じ見立て:
-       4 本の軌道 = 4 次元、その上の惑星 = 各行のコマ、右端の恒星 = ゴール。 -->
+       4 本の点線の軌道 = 4 次元、その上の惑星 = 各行のコマ (行ごとに違う模様)、
+       右端の恒星 = ゴール。ゲーム内の絵 (css/coord.css) と同じ描き方にそろえてある。
+       小さく表示される (favicon は 16〜32px) ので、形は大きく、線は太めにしている。 -->
   <defs>
-    <radialGradient id="bg" cx="24%" cy="12%" r="100%">
-      <stop offset="0%" stop-color="#1c2658"/>
-      <stop offset="55%" stop-color="#080c1c"/>
+    <radialGradient id="bg" cx="22%" cy="10%" r="105%">
+      <stop offset="0%" stop-color="#1d2860"/>
+      <stop offset="52%" stop-color="#090d1f"/>
       <stop offset="100%" stop-color="#04060f"/>
     </radialGradient>
-    <radialGradient id="neb" cx="20%" cy="85%" r="60%">
-      <stop offset="0%" stop-color="#8a3cc8" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#8a3cc8" stop-opacity="0"/>
+    <radialGradient id="neb-a" cx="18%" cy="88%" r="58%">
+      <stop offset="0%" stop-color="#9a3cd0" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#9a3cd0" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="neb-b" cx="40%" cy="4%" r="46%">
+      <stop offset="0%" stop-color="#1f8fc0" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#1f8fc0" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 恒星: 白い芯・金色の光球・外へ薄れる光 -->
     <radialGradient id="sun" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#fffbea"/>
-      <stop offset="22%" stop-color="#ffe3a0"/>
-      <stop offset="48%" stop-color="#ffb554" stop-opacity="0.75"/>
-      <stop offset="100%" stop-color="#ff8a32" stop-opacity="0"/>
+      <stop offset="16%" stop-color="#fff0c2"/>
+      <stop offset="30%" stop-color="#ffd27a"/>
+      <stop offset="52%" stop-color="#ffa545" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ff7a2a" stop-opacity="0"/>
     </radialGradient>
-    <!-- 惑星の光の当たり方 (左上が明るく、右下が夜の側) -->
-    <radialGradient id="shade" cx="32%" cy="28%" r="80%">
-      <stop offset="0%" stop-color="#fff" stop-opacity="0.65"/>
-      <stop offset="30%" stop-color="#fff" stop-opacity="0.05"/>
-      <stop offset="100%" stop-color="#02030a" stop-opacity="0.7"/>
+
+    <!-- 惑星の地の色 (左上が明るく、右下が暗い)。ゲームの .planet と同じ作り -->
+    <radialGradient id="pl-0" cx="36%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#d4fbff"/><stop offset="42%" stop-color="#5fd8ee"/><stop offset="100%" stop-color="#0f3d4a"/>
     </radialGradient>
-    <clipPath id="c1"><circle cx="150" cy="118" r="34"/></clipPath>
-    <clipPath id="c3"><circle cx="118" cy="330" r="34"/></clipPath>
-    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="9" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <radialGradient id="pl-1" cx="36%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#e3d9ff"/><stop offset="42%" stop-color="#8f6cff"/><stop offset="100%" stop-color="#22174d"/>
+    </radialGradient>
+    <radialGradient id="pl-2" cx="36%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#ffd5e7"/><stop offset="42%" stop-color="#ff5fa2"/><stop offset="100%" stop-color="#4a1030"/>
+    </radialGradient>
+    <radialGradient id="pl-3" cx="36%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#f3ffd4"/><stop offset="42%" stop-color="#bde65c"/><stop offset="100%" stop-color="#2f4210"/>
+    </radialGradient>
+    <!-- 光の当たり方: 左上のつや と 右下の夜の側 -->
+    <radialGradient id="gloss" cx="30%" cy="26%" r="30%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.7"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="night" cx="78%" cy="82%" r="62%">
+      <stop offset="0%" stop-color="#02030a" stop-opacity="0.75"/><stop offset="100%" stop-color="#02030a" stop-opacity="0"/>
+    </radialGradient>
+
+    <clipPath id="c0"><circle cx="150" cy="128" r="40"/></clipPath>
+    <clipPath id="c2"><circle cx="112" cy="300" r="40"/></clipPath>
+
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="11"/>
     </filter>
   </defs>
 
+  <!-- 宇宙と星雲 -->
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="112" fill="url(#neb)"/>
-
-  <!-- 星 -->
+  <rect width="512" height="512" rx="112" fill="url(#neb-a)"/>
+  <rect width="512" height="512" rx="112" fill="url(#neb-b)"/>
   <g fill="#dce6f7">
-    <circle cx="60" cy="60" r="2" opacity="0.7"/>
-    <circle cx="300" cy="44" r="1.6" opacity="0.6"/>
-    <circle cx="240" cy="470" r="2" opacity="0.5"/>
-    <circle cx="70" cy="440" r="1.4" opacity="0.6"/>
-    <circle cx="330" cy="250" r="1.4" opacity="0.5"/>
+    <circle cx="62" cy="58" r="2.4" opacity="0.8"/>
+    <circle cx="318" cy="46" r="2" opacity="0.6"/>
+    <circle cx="226" cy="476" r="2.2" opacity="0.55"/>
+    <circle cx="52" cy="452" r="1.8" opacity="0.6"/>
+    <circle cx="214" cy="170" r="1.6" opacity="0.5"/>
+    <circle cx="36" cy="214" r="1.6" opacity="0.5"/>
   </g>
 
-  <!-- 恒星 (ゴール) -->
-  <circle cx="436" cy="256" r="150" fill="url(#sun)"/>
-  <g stroke="#ffd98a" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round">
-    <line x1="436" y1="150" x2="436" y2="120"/>
-    <line x1="436" y1="362" x2="436" y2="392"/>
-    <line x1="361" y1="181" x2="340" y2="160"/>
-    <line x1="361" y1="331" x2="340" y2="352"/>
+  <!-- 恒星 (ゴール)。光条は長短を交互に -->
+  <circle cx="452" cy="256" r="170" fill="url(#sun)"/>
+  <g stroke="#ffe0a0" stroke-linecap="round" stroke-opacity="0.5" stroke-width="4">
+    <line x1="452" y1="176" x2="452" y2="120"/>
+    <line x1="452" y1="336" x2="452" y2="392"/>
+    <line x1="395" y1="199" x2="360" y2="164"/>
+    <line x1="395" y1="313" x2="360" y2="348"/>
+    <line x1="372" y1="256" x2="326" y2="256"/>
+  </g>
+  <g stroke="#ffe0a0" stroke-linecap="round" stroke-opacity="0.3" stroke-width="3">
+    <line x1="421" y1="182" x2="408" y2="150"/>
+    <line x1="421" y1="330" x2="408" y2="362"/>
+    <line x1="378" y1="225" x2="350" y2="212"/>
+    <line x1="378" y1="287" x2="350" y2="300"/>
+  </g>
+  <circle cx="452" cy="256" r="46" fill="#fffbea" opacity="0.9"/>
+
+  <!-- 4 本の軌道 (= 4 次元)。行の色の点線 -->
+  <g stroke-width="5" stroke-dasharray="12 13" stroke-linecap="round" opacity="0.55">
+    <line x1="48" y1="128" x2="392" y2="128" stroke="#6ff0ff"/>
+    <line x1="48" y1="214" x2="392" y2="214" stroke="#9d7bff"/>
+    <line x1="48" y1="300" x2="392" y2="300" stroke="#ff5fa2"/>
+    <line x1="48" y1="386" x2="392" y2="386" stroke="#c8f06f"/>
   </g>
 
-  <!-- 4 本の軌道 (= 4 次元) -->
-  <g stroke-width="4" stroke-dasharray="10 12" stroke-linecap="round" opacity="0.5">
-    <line x1="56" y1="118" x2="400" y2="118" stroke="#6ff0ff"/>
-    <line x1="56" y1="224" x2="400" y2="224" stroke="#9d7bff"/>
-    <line x1="56" y1="330" x2="400" y2="330" stroke="#ff5fa2"/>
-    <line x1="56" y1="436" x2="400" y2="436" stroke="#c8f06f"/>
+  <!-- 惑星のまわりの淡い光 -->
+  <g filter="url(#glow)" opacity="0.8">
+    <circle cx="150" cy="128" r="40" fill="#6ff0ff"/>
+    <circle cx="262" cy="214" r="40" fill="#9d7bff"/>
+    <circle cx="112" cy="300" r="40" fill="#ff5fa2"/>
+    <circle cx="322" cy="386" r="40" fill="#c8f06f"/>
   </g>
 
-  <!-- 惑星 (= 各行のコマ)。行ごとに違う模様 -->
-  <g filter="url(#glow)">
-    <circle cx="150" cy="118" r="34" fill="#6ff0ff"/>
-    <circle cx="262" cy="224" r="34" fill="#9d7bff"/>
-    <circle cx="118" cy="330" r="34" fill="#ff5fa2"/>
-    <circle cx="330" cy="436" r="34" fill="#c8f06f"/>
+  <!-- 0: 縞のガス惑星と、大きな渦 -->
+  <circle cx="150" cy="128" r="40" fill="url(#pl-0)"/>
+  <g clip-path="url(#c0)">
+    <g transform="rotate(8 150 128)">
+      <rect x="100" y="104" width="100" height="8" fill="#fff" opacity="0.2"/>
+      <rect x="100" y="120" width="100" height="10" fill="#000" opacity="0.18"/>
+      <rect x="100" y="136" width="100" height="6" fill="#fff" opacity="0.16"/>
+      <rect x="100" y="150" width="100" height="9" fill="#000" opacity="0.16"/>
+    </g>
+    <ellipse cx="165" cy="142" rx="10" ry="6" fill="#fff4e8" opacity="0.6"/>
   </g>
-  <!-- 縞のガス惑星 -->
-  <g clip-path="url(#c1)" fill="#fff" opacity="0.22">
-    <rect x="110" y="100" width="90" height="7"/>
-    <rect x="110" y="120" width="90" height="10"/>
-    <rect x="110" y="140" width="90" height="5"/>
+
+  <!-- 1: 輪のある惑星。輪の奥側を先に描き、手前側を惑星のあとに描く -->
+  <g transform="rotate(-17 262 214)">
+    <path d="M 190 214 A 72 18 0 0 1 334 214" fill="none" stroke="#e6dcff" stroke-width="6" stroke-opacity="0.35"/>
   </g>
-  <!-- クレーターの岩石惑星 -->
-  <g clip-path="url(#c3)" fill="#000" opacity="0.25">
-    <circle cx="106" cy="340" r="8"/>
-    <circle cx="130" cy="316" r="5"/>
-    <circle cx="132" cy="346" r="4"/>
+  <circle cx="262" cy="214" r="40" fill="url(#pl-1)"/>
+
+  <!-- 2: クレーターの岩石惑星 -->
+  <circle cx="112" cy="300" r="40" fill="url(#pl-2)"/>
+  <g clip-path="url(#c2)">
+    <circle cx="98" cy="314" r="10" fill="#000" opacity="0.28"/>
+    <circle cx="96" cy="312" r="10" fill="none" stroke="#fff" stroke-opacity="0.18" stroke-width="2"/>
+    <circle cx="128" cy="286" r="7" fill="#000" opacity="0.24"/>
+    <circle cx="132" cy="318" r="5" fill="#000" opacity="0.22"/>
+    <circle cx="108" cy="282" r="4" fill="#000" opacity="0.18"/>
   </g>
-  <circle cx="150" cy="118" r="34" fill="url(#shade)"/>
-  <circle cx="262" cy="224" r="34" fill="url(#shade)"/>
-  <circle cx="118" cy="330" r="34" fill="url(#shade)"/>
-  <circle cx="330" cy="436" r="34" fill="url(#shade)"/>
-  <!-- 輪のある惑星 -->
-  <ellipse cx="262" cy="224" rx="60" ry="15" fill="none" stroke="#e6dcff" stroke-width="5"
-           stroke-opacity="0.9" transform="rotate(-17 262 224)"/>
+
+  <!-- 3: 恒星の手前まで来た、衛星を連れた惑星 -->
+  <circle cx="322" cy="386" r="40" fill="url(#pl-3)"/>
+  <ellipse cx="310" cy="398" rx="16" ry="9" fill="#000" opacity="0.14"/>
+
+  <!-- 光の当たり方 (4 つとも同じ向き) -->
+  <g>
+    <circle cx="150" cy="128" r="40" fill="url(#night)"/>
+    <circle cx="262" cy="214" r="40" fill="url(#night)"/>
+    <circle cx="112" cy="300" r="40" fill="url(#night)"/>
+    <circle cx="322" cy="386" r="40" fill="url(#night)"/>
+    <circle cx="150" cy="128" r="40" fill="url(#gloss)"/>
+    <circle cx="262" cy="214" r="40" fill="url(#gloss)"/>
+    <circle cx="112" cy="300" r="40" fill="url(#gloss)"/>
+    <circle cx="322" cy="386" r="40" fill="url(#gloss)"/>
+  </g>
+
+  <!-- 輪の手前側 -->
+  <g transform="rotate(-17 262 214)">
+    <path d="M 334 214 A 72 18 0 0 1 190 214" fill="none" stroke="#efe8ff" stroke-width="6"/>
+  </g>
+
   <!-- 衛星 -->
-  <circle cx="378" cy="404" r="9" fill="#dfe6f5"/>
+  <circle cx="378" cy="350" r="11" fill="#e6ecf7"/>
+  <circle cx="381" cy="353" r="11" fill="#02030a" opacity="0.3"/>
 </svg>
