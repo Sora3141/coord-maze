@@ -13,6 +13,9 @@
   --wak-font: inherit;
 }
 
+/* スマホのダブルタップ拡大を止める（ピンチは使える）。子にも効く */
+html { touch-action: manipulation; }
+
 /* hidden 属性を確実に効かせる（display を指定したボタンでも隠れるように） */
 [data-wak][hidden] { display: none !important; }
 
